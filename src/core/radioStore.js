@@ -1,14 +1,14 @@
 import { create } from 'zustand'
 
 export const MOCK_STATIONS = [
-  { id: 1, name: 'Lofi Hip Hop', url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
+  { id: 1, name: 'Groove Salad', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
   { id: 2, name: 'Classical FM', url: 'https://strm112.1.fm/classical_mobile_mp3' },
   { id: 3, name: 'Synthwave / Retro', url: 'https://strm112.1.fm/back280s_mobile_mp3' },
 ]
 
 export const useRadioStore = create((set, get) => ({
   // Initialize native Audio object outside React components
-  audioElement: new Audio(),
+  audioElement: Object.assign(new Audio(), { preload: 'none' }),
   
   isPlaying: false,
   isBuffering: false,
@@ -24,17 +24,19 @@ export const useRadioStore = create((set, get) => ({
 
     audio.onended = () => set({ isPlaying: false })
     audio.onerror = () => {
-      set({ isPlaying: false, error: "Stream unreachable." })
+      set({ isPlaying: false, isBuffering: false, error: "Stream unreachable." })
     }
     audio.onplaying = () => set({ isBuffering: false })
     audio.onwaiting = () => set({ isBuffering: true })
-    
-    audio.src = get().currentStation.url
   },
 
   togglePlay: () => {
-    const { audioElement, isPlaying } = get()
+    const { audioElement, isPlaying, currentStation } = get()
     set({ error: null })
+
+    if (!audioElement.src) {
+      audioElement.src = currentStation.url
+    }
 
     if (isPlaying) {
       audioElement.pause()
