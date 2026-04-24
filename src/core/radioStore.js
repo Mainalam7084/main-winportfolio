@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export const MOCK_STATIONS = [
-  { id: 1, name: 'Groove Salad', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
+  { id: 1, name: 'NPO Radio 1', url: 'https://icecast.omroep.nl/radio1-bb-mp3' },
   { id: 2, name: 'Classical FM', url: 'https://strm112.1.fm/classical_mobile_mp3' },
   { id: 3, name: 'Synthwave / Retro', url: 'https://strm112.1.fm/back280s_mobile_mp3' },
 ]
