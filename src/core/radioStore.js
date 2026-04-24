@@ -24,7 +24,8 @@ export const useRadioStore = create((set, get) => ({
 
     audio.onended = () => set({ isPlaying: false })
     audio.onerror = () => {
-      set({ isPlaying: false, isBuffering: false, error: "Stream unreachable." })
+      const audioError = audio.error?.message || "Stream unreachable."
+      set({ isPlaying: false, isBuffering: false, error: audioError })
     }
     audio.onplaying = () => set({ isBuffering: false })
     audio.onwaiting = () => set({ isBuffering: true })
@@ -38,6 +39,8 @@ export const useRadioStore = create((set, get) => ({
       audioElement.src = currentStation.url
     }
 
+    audioElement.load()
+
     if (isPlaying) {
       audioElement.pause()
       set({ isPlaying: false })
@@ -47,7 +50,7 @@ export const useRadioStore = create((set, get) => ({
         set({ isPlaying: true, isBuffering: false })
       }).catch(err => {
         console.error("Audio playback failed:", err)
-        set({ error: "Error playing stream.", isBuffering: false, isPlaying: false })
+        set({ error: err?.message || "Error playing stream.", isBuffering: false, isPlaying: false })
       })
     }
   },
