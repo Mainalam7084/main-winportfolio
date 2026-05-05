@@ -1,86 +1,147 @@
 import React, { useEffect } from 'react'
-import { Play, Pause, SkipBack, SkipForward, Radio as RadioIcon, Music, AlertCircle } from 'lucide-react'
 import { useRadioStore, MOCK_STATIONS } from '../../core/radioStore'
+import { PxPlay, PxPause, PxSkipBack, PxSkipForward, PxRadio, PxMusic } from '../../components/ui/PixelIcons'
 
 export default function Radio() {
-  const { 
-    isPlaying, 
-    isBuffering, 
-    error, 
-    currentStation, 
-    initAudio, 
-    togglePlay, 
-    playNext, 
-    playPrev, 
-    setStation 
-  } = useRadioStore()
+  const { isPlaying, isBuffering, error, currentStation, initAudio, togglePlay, playNext, playPrev, setStation } = useRadioStore()
 
-  useEffect(() => {
-    initAudio()
-  }, [])
+  useEffect(() => { initAudio() }, [])
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#1e1e1e] text-white">
-      <div className="flex-1 p-6 flex flex-col items-center justify-center relative">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-6 relative">
-          <Music size={48} className="text-white" />
+    <div className="w-full h-full flex flex-col" style={{ background: '#fff', fontFamily: 'var(--font-family-sans)', color: '#000' }}>
+
+      {/* ── Header ── */}
+      <div style={{ background: '#000', borderBottom: '3px solid #000', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <PxRadio size={18} style={{ color: '#fff' }} />
+        <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '20px', color: '#fff', letterSpacing: '2px' }}>RADIO_</span>
+      </div>
+
+      {/* ── Now Playing ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', gap: '20px' }}>
+
+        {/* Album art box */}
+        <div style={{
+          width: 120, height: 120,
+          border: '3px solid #000', boxShadow: isPlaying || isBuffering ? '0 0 0 3px #facc15, 6px 6px 0 #000' : '6px 6px 0 #000',
+          background: '#f5f5f5',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'relative',
+          transition: 'box-shadow 0.1s',
+        }}>
+          <PxMusic size={56} style={{ color: '#000' }} />
           {(isPlaying || isBuffering) && (
-            <div className="absolute inset-0 rounded-full border-2 border-blue-400 animate-ping opacity-75"></div>
+            <div style={{
+              position: 'absolute', inset: -8,
+              border: '3px solid #facc15',
+              animation: 'ping 1s cubic-bezier(0,0,.2,1) infinite',
+            }} />
           )}
         </div>
-        
-        <h2 className="text-2xl font-bold mb-2 text-center">{currentStation.name}</h2>
-        <p className="text-gray-400 text-sm mb-4">Live Broadcasting</p>
 
+        <style>{`@keyframes ping { 75%,100% { transform: scale(1.15); opacity: 0; } }`}</style>
+
+        {/* Station info */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '20px', color: '#000', marginBottom: '6px' }}>
+            {currentStation.name}
+          </div>
+          <div style={{ fontSize: '11px', color: '#555', letterSpacing: '2px' }}>
+            {isBuffering ? '...BUFFERING...' : isPlaying ? '◉ LIVE' : 'STOPPED'}
+          </div>
+        </div>
+
+        {/* Error */}
         {error && (
-          <div className="mb-4 text-xs text-red-400 flex items-center bg-red-400/10 px-3 py-1.5 rounded-full">
-            <AlertCircle size={14} className="mr-2" /> {error}
+          <div style={{ background: '#f5f5f5', border: '2px solid #000', padding: '6px 14px', fontSize: '11px', color: '#000' }}>
+            ⚠ {error}
           </div>
         )}
 
-        <div className="flex items-center gap-6">
-          <button onClick={playPrev} className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition active:scale-95">
-            <SkipBack size={24} />
-          </button>
-          
-          <button 
-            className="p-5 bg-blue-600 rounded-full hover:bg-blue-500 transition shadow-lg shadow-blue-600/30 active:scale-95 flex items-center justify-center"
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <CtrlBtn onClick={playPrev} title="Previous">
+            <PxSkipBack size={22} />
+          </CtrlBtn>
+
+          <CtrlBtn
             onClick={togglePlay}
+            primary
+            title={isPlaying ? 'Pause' : 'Play'}
+            style={{ width: 64, height: 64 }}
           >
             {isBuffering ? (
-              <div className="w-8 h-8 border-2 border-t-white border-transparent rounded-full animate-spin"></div>
+              <div style={{ width: 24, height: 24, border: '3px solid #000', borderTop: '3px solid transparent', borderRadius: 999, animation: 'spin 0.6s linear infinite' }} />
             ) : isPlaying ? (
-              <Pause size={32} />
+              <PxPause size={28} style={{ color: '#000' }} />
             ) : (
-              <Play size={32} className="ml-1" />
+              <PxPlay size={28} style={{ color: '#000' }} />
             )}
-          </button>
-          
-          <button onClick={playNext} className="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition active:scale-95">
-            <SkipForward size={24} />
-          </button>
+          </CtrlBtn>
+
+          <CtrlBtn onClick={playNext} title="Next">
+            <PxSkipForward size={22} />
+          </CtrlBtn>
         </div>
+
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
 
-      <div className="bg-gray-900 border-t border-gray-800 h-1/3 overflow-y-auto p-4 custom-scrollbar">
-        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Stations</h3>
-        <div className="flex flex-col gap-2">
-          {MOCK_STATIONS.map(station => (
+      {/* ── Station list ── */}
+      <div style={{ borderTop: '4px solid #000', maxHeight: '38%', overflowY: 'auto', background: '#f5f5f5' }}>
+        <div style={{ padding: '6px 12px', fontFamily: 'var(--font-family-pixel)', fontSize: '12px', color: '#000', letterSpacing: '1px', borderBottom: '2px solid #e5e5e5' }}>
+          STATIONS
+        </div>
+        {MOCK_STATIONS.map(station => {
+          const active = currentStation.id === station.id
+          return (
             <button
               key={station.id}
-              onClick={() => {
-                setStation(station)
-                if (!isPlaying) togglePlay() // Wait, setStation automatically plays if isPlaying was true, but if it was false, the user clicked it so they probably want it to start playing.
-                // Let's check: if !isPlaying, calling togglePlay after setStation is fine since wait, setStation doesn't block. togglePlay will hit `.play()`.
+              onClick={() => { setStation(station); if (!isPlaying) togglePlay() }}
+              style={{
+                width: '100%', padding: '10px 14px', textAlign: 'left',
+                display: 'flex', alignItems: 'center', gap: '10px',
+                background: active ? 'rgba(250,204,21,0.35)' : 'transparent',
+                borderLeft: active ? '4px solid #000' : '4px solid transparent',
+                border: 'none', borderBottom: '2px solid #e5e5e5',
+                cursor: 'pointer', color: '#000',
+                fontFamily: 'var(--font-family-sans)', fontSize: '12px',
+                transition: 'none', outline: 'none',
               }}
-              className={`flex items-center p-3 rounded-lg text-left transition ${currentStation.id === station.id ? 'bg-blue-600/20 border border-blue-500/50' : 'hover:bg-gray-800 border border-transparent'}`}
+              onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(250,204,21,0.15)' }}
+              onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
-              <RadioIcon size={20} className={`mr-3 ${currentStation.id === station.id ? 'text-blue-400' : 'text-gray-400'}`} />
-              <span className={currentStation.id === station.id ? 'text-white font-medium' : 'text-gray-300'}>{station.name}</span>
+              <PxRadio size={16} style={{ color: active ? '#000' : '#777', flexShrink: 0 }} />
+              <span>{station.name}</span>
+              {active && isPlaying && (
+                <span style={{ marginLeft: 'auto', color: '#000', fontSize: '10px', letterSpacing: '1px' }}>▶ LIVE</span>
+              )}
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
     </div>
+  )
+}
+
+function CtrlBtn({ children, onClick, primary, title, style = {} }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 48, height: 48,
+        background: primary ? '#facc15' : '#000',
+        border: '4px solid #000',
+        boxShadow: primary ? '4px 4px 0 #000' : '4px 4px 0 #555',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', outline: 'none', color: primary ? '#000' : '#fff',
+        transition: 'none',
+        ...style,
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '6px 6px 0 #facc15' }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = primary ? '4px 4px 0 #000' : '4px 4px 0 #555' }}
+    >
+      {children}
+    </button>
   )
 }

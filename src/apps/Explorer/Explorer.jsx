@@ -1,92 +1,259 @@
-import React, { useState } from 'react'
-import { Folder, Image as ImageIcon, FileText, Video, Download, Monitor, HardDrive, File as FileIcon } from 'lucide-react'
+import React, { useState, useRef } from 'react'
+import { useFileSystem } from '../../core/fileSystemStore'
+import { useStore } from '../../core/store'
+import {
+  PxFolder, PxDocument, PxImage, PxVideo, PxHardDrive,
+  PxMonitor, PxDownload, PxArrowLeft, PxArrowRight,
+} from '../../components/ui/PixelIcons'
 
-const MOCK_FILES = {
-  Desktop: [
-    { name: 'Projects', type: 'folder', icon: Folder },
-    { name: 'notes.txt', type: 'text', icon: FileText },
-  ],
-  Downloads: [
-    { name: 'installer.exe', type: 'file', icon: FileIcon },
-    { name: 'vacation.mp4', type: 'video', icon: Video },
-  ],
-  Documents: [
-    { name: 'Resume.pdf', type: 'file', icon: FileText },
-  ],
-  Images: [
-    { name: 'wallpaper.jpg', type: 'image', icon: ImageIcon },
-  ],
-  Videos: [],
-  'This PC': [
-    { name: 'Local Disk (C:)', type: 'drive', icon: HardDrive },
-  ]
+// Maps display path name → filesystem store key
+const FS_KEY = {
+  Desktop:    'desktop',
+  Downloads:  'downloads',
+  Documents:  'documents',
+  Images:     'images',
+  Videos:     'videos',
 }
 
-const SIDEBAR_ITEMS = [
-  { name: 'Quick Access', icon: Folder, isLabel: true },
-  { name: 'Desktop', icon: Monitor },
-  { name: 'Downloads', icon: Download },
-  { name: 'Documents', icon: FileText },
-  { name: 'Images', icon: ImageIcon },
-  { name: 'Videos', icon: Video },
-  { name: 'This PC', icon: HardDrive },
+const SIDEBAR = [
+  { label: 'QUICK ACCESS', isLabel: true },
+  { label: 'Desktop',   key: 'Desktop',   Icon: PxMonitor,   color: '#000' },
+  { label: 'Downloads', key: 'Downloads', Icon: PxDownload,  color: '#000' },
+  { label: 'Documents', key: 'Documents', Icon: PxDocument,  color: '#000' },
+  { label: 'Images',    key: 'Images',    Icon: PxImage,     color: '#000' },
+  { label: 'Videos',    key: 'Videos',    Icon: PxVideo,     color: '#000' },
+  { label: 'THIS PC',   isLabel: true },
+  { label: 'Local Disk (C:)', key: 'This PC', Icon: PxHardDrive, color: '#000' },
 ]
+
+function getIconInfo(item) {
+  if (item.type === 'folder') return { Icon: PxFolder,   color: '#000' }
+  if (item.mimeType?.startsWith('image/')) return { Icon: PxImage,    color: '#555' }
+  if (item.mimeType?.startsWith('video/')) return { Icon: PxVideo,    color: '#555' }
+  return { Icon: PxDocument, color: '#555' }
+}
+
+// Consistent button style for toolbar
+const toolBtn = {
+  background: '#fff',
+  color: '#000',
+  border: '2px solid #000',
+  padding: '4px 12px',
+  cursor: 'pointer',
+  fontSize: '12px',
+  fontFamily: 'var(--font-family-sans)',
+  boxShadow: '2px 2px 0px #000',
+  transition: 'none',
+  lineHeight: '1.4',
+}
 
 export default function Explorer({ initialPath = 'This PC' }) {
   const [currentPath, setCurrentPath] = useState(initialPath)
+  const [history, setHistory] = useState([initialPath])
+  const [histIdx, setHistIdx] = useState(0)
+  const [selected, setSelected] = useState(null)
+  const [preview, setPreview] = useState(null)
+  const { fs, uploadToFolder } = useFileSystem()
+  const openWindow = useStore(state => state.openWindow)
+  const lastClick = useRef({ id: null, time: 0 })
+  const fileInputRef = useRef(null)
 
-  const files = MOCK_FILES[currentPath] || []
+  const navigate = (path) => {
+    const next = history.slice(0, histIdx + 1)
+    next.push(path)
+    setHistory(next)
+    setHistIdx(next.length - 1)
+    setCurrentPath(path)
+    setSelected(null)
+  }
+
+  const goBack = () => {
+    if (histIdx > 0) { setHistIdx(histIdx - 1); setCurrentPath(history[histIdx - 1]); setSelected(null) }
+  }
+  const goForward = () => {
+    if (histIdx < history.length - 1) { setHistIdx(histIdx + 1); setCurrentPath(history[histIdx + 1]); setSelected(null) }
+  }
+
+  const fsKey = FS_KEY[currentPath]
+  const files = fsKey ? (fs[fsKey] ?? []) : []
+
+  const handleItemClick = (item) => {
+    const itemId = item.id || item.name
+    const now = Date.now()
+    setSelected(itemId)
+
+    if (lastClick.current.id === itemId && now - lastClick.current.time < 400) {
+      lastClick.current = { id: null, time: 0 }
+      // Double-click action
+      if (item.type === 'folder') {
+        if (item.path === '/projects') {
+          openWindow({ app: 'projects', title: 'Projects', props: {} })
+        } else {
+          navigate(item.name)
+        }
+      } else if (item.url) {
+        setPreview(item)
+      }
+    } else {
+      lastClick.current = { id: itemId, time: now }
+    }
+  }
+
+  const handleUpload = (e) => {
+    if (!fsKey) return
+    Array.from(e.target.files).forEach(f => uploadToFolder(fsKey, f))
+    e.target.value = ''
+  }
 
   return (
-    <div className="w-full h-full flex flex-col bg-white text-black text-sm">
-      {/* Top Toolbar */}
-      <div className="flex items-center px-4 py-2 bg-[#f0f0f0] border-b border-gray-300 gap-4">
-        <div className="flex gap-2">
-          {/* Mock nav arrows */}
-          <div className="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-200 cursor-pointer">&lt;</div>
-          <div className="w-6 h-6 rounded flex items-center justify-center hover:bg-gray-200 cursor-pointer text-gray-400">&gt;</div>
+    <div className="w-full h-full flex flex-col" style={{ background: '#fff', fontFamily: 'var(--font-family-sans)' }}>
+
+      {/* ── Toolbar ── */}
+      <div style={{ background: '#fafafa', borderBottom: '2px solid #000', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button style={{ ...toolBtn, opacity: histIdx > 0 ? 1 : 0.3 }} onClick={goBack}>
+          <PxArrowLeft size={12} className="inline" /> BACK
+        </button>
+        <button style={{ ...toolBtn, opacity: histIdx < history.length - 1 ? 1 : 0.3 }} onClick={goForward}>
+          FWD <PxArrowRight size={12} className="inline" />
+        </button>
+
+        {/* Address bar */}
+        <div style={{
+          flex: 1, background: '#fff', border: '2px solid #000',
+          padding: '4px 12px', color: '#000', fontSize: '13px',
+          display: 'flex', alignItems: 'center', gap: '8px',
+          fontFamily: 'var(--font-family-sans)',
+        }}>
+          <PxFolder size={14} className="shrink-0" style={{ color: '#000' }} />
+          <span>{currentPath}</span>
         </div>
-        <div className="flex-1 bg-white border border-gray-300 px-3 py-1 flex items-center shadow-inner">
-          <Folder size={14} className="mr-2 text-blue-500" />
-          {currentPath}
-        </div>
-        <div className="w-48 bg-white border border-gray-300 px-3 py-1 text-gray-500 italic shadow-inner">
-          Search {currentPath}
-        </div>
+
+        {/* Upload — only available inside real folders */}
+        {fsKey && (
+          <>
+            <button
+              style={{ ...toolBtn, background: '#facc15', border: '2px solid #000', boxShadow: '2px 2px 0 #000' }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              ↑ UPLOAD
+            </button>
+            <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleUpload} />
+          </>
+        )}
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-48 bg-[#f5f6f7] border-r border-gray-300 overflow-y-auto py-2">
-          {SIDEBAR_ITEMS.map((item, i) => (
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+
+        {/* ── Sidebar ── */}
+        <div style={{ width: '160px', background: '#fafafa', borderRight: '2px solid #000', overflowY: 'auto', padding: '8px 0', flexShrink: 0 }}>
+          {SIDEBAR.map((item, i) =>
             item.isLabel ? (
-              <div key={i} className="px-4 py-1 text-xs text-gray-500 mt-2">{item.name}</div>
-            ) : (
-              <div 
-                key={i} 
-                className={`flex items-center px-6 py-1 cursor-pointer ${currentPath === item.name ? 'bg-blue-100' : 'hover:bg-[#e5f3ff]'}`}
-                onClick={() => setCurrentPath(item.name)}
-              >
-                <item.icon size={16} className={`mr-2 ${currentPath === item.name ? 'text-blue-500' : 'text-blue-400'}`} />
-                <span>{item.name}</span>
+              <div key={i} style={{ padding: '10px 14px 4px', fontSize: '10px', color: '#777', letterSpacing: '1px', fontWeight: 'bold' }}>
+                {item.label}
               </div>
+            ) : (
+              <button
+                key={i}
+                onClick={() => navigate(item.key)}
+                style={{
+                  width: '100%', padding: '8px 14px',
+                  cursor: 'pointer', textAlign: 'left',
+                  color: '#000',
+                  background: currentPath === item.key ? '#facc15' : 'transparent',
+                  borderLeft: `3px solid ${currentPath === item.key ? '#000' : 'transparent'}`,
+                  fontSize: '12px', border: 'none', outline: 'none',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  transition: 'none',
+                }}
+                onMouseEnter={(e) => { if (currentPath !== item.key) e.currentTarget.style.background = 'rgba(250,204,21,0.3)' }}
+                onMouseLeave={(e) => { if (currentPath !== item.key) e.currentTarget.style.background = 'transparent' }}
+              >
+                <item.Icon size={14} style={{ color: item.color, flexShrink: 0 }} />
+                {item.label}
+              </button>
             )
-          ))}
+          )}
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto bg-white p-4">
-          <div className="font-semibold text-gray-700 mb-4 border-b border-gray-200 pb-2">{currentPath}</div>
+        {/* ── Main content ── */}
+        <div style={{ flex: 1, background: '#fff', overflowY: 'auto', padding: '20px', position: 'relative' }}>
+
+          {/* Path header */}
+          <div style={{ borderBottom: '2px solid #000', marginBottom: '18px', paddingBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '20px', color: '#000' }}>{currentPath}</span>
+            <span style={{ fontSize: '11px', color: '#777' }}>{files.length} item(s)</span>
+          </div>
+
+          {/* File preview overlay */}
+          {preview && (
+            <div
+              onClick={() => setPreview(null)}
+              style={{
+                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 20,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px',
+              }}
+            >
+              {preview.mimeType?.startsWith('image/') && (
+                <img
+                  src={preview.url} alt={preview.name}
+                  onClick={e => e.stopPropagation()}
+                  style={{ maxWidth: '90%', maxHeight: '75%', border: '4px solid #fff', boxShadow: '8px 8px 0 #000' }}
+                />
+              )}
+              {preview.mimeType?.startsWith('video/') && (
+                <video
+                  src={preview.url} controls
+                  onClick={e => e.stopPropagation()}
+                  style={{ maxWidth: '90%', maxHeight: '75%', border: '4px solid #fff' }}
+                />
+              )}
+              <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '14px', color: '#fff' }}>{preview.name}</span>
+              <button
+                onClick={() => setPreview(null)}
+                style={{ ...toolBtn, background: '#facc15', border: '2px solid #000', boxShadow: '3px 3px 0 #000' }}
+              >
+                [CLOSE]
+              </button>
+            </div>
+          )}
+
+          {/* Files grid */}
           {files.length === 0 ? (
-            <div className="text-gray-400 flex justify-center items-center h-32">This folder is empty.</div>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              height: '120px', color: '#aaa', border: '2px dashed #ccc',
+              fontFamily: 'var(--font-family-pixel)', fontSize: '16px',
+            }}>
+              [EMPTY FOLDER]
+            </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              {files.map((file, i) => (
-                <div key={i} className="w-24 flex flex-col items-center justify-start p-2 hover:bg-[#e5f3ff] hover:outline-1 hover:outline-[#cce8ff] rounded border border-transparent cursor-pointer">
-                  <file.icon size={40} className={file.type === 'folder' ? 'text-yellow-400' : 'text-blue-400'} />
-                  <span className="mt-2 text-center break-words w-full truncate">{file.name}</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {files.map((file) => {
+                const { Icon, color } = getIconInfo(file)
+                const itemId = file.id || file.name
+                const isSel = selected === itemId
+                return (
+                  <div
+                    key={itemId}
+                    onClick={() => handleItemClick(file)}
+                    style={{
+                      width: '88px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      padding: '10px 6px', cursor: 'pointer', gap: '6px',
+                      background: isSel ? '#facc15' : 'transparent',
+                      border: `2px solid ${isSel ? '#000' : 'transparent'}`,
+                      boxShadow: isSel ? '3px 3px 0 #000' : 'none',
+                      transition: 'none',
+                    }}
+                    onMouseEnter={(e) => { if (!isSel) e.currentTarget.style.background = 'rgba(250,204,21,0.25)' }}
+                    onMouseLeave={(e) => { if (!isSel) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <Icon size={40} style={{ color }} />
+                    <span style={{ fontSize: '11px', textAlign: 'center', wordBreak: 'break-word', color: '#000', lineHeight: '1.2', maxWidth: '80px' }}>
+                      {file.name}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

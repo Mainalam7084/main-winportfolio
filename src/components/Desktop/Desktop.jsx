@@ -1,56 +1,148 @@
-import React from 'react'
-import { Folder, Image as ImageIcon, FileText, Video, Monitor, Download, Globe } from 'lucide-react'
+import React, { useState, useRef, useCallback } from 'react'
 import { useStore } from '../../core/store'
-import { AppRegistry } from '../../core/AppRegistry'
-import bgImage from '../../assets/fondoWindows.jpg'
+import { useFileSystem } from '../../core/fileSystemStore'
+import {
+  PxMonitor, PxDownload, PxDocument, PxImage, PxVideo,
+  PxHardDrive, PxGlobe, PxGrid4, PxFolder,
+} from '../ui/PixelIcons'
 
-const SHORTCUTS = [
-  { name: 'Desktop', icon: Monitor, type: 'explorer' },
-  { name: 'Downloads', icon: Download, type: 'explorer' },
-  { name: 'Documents', icon: FileText, type: 'explorer' },
-  { name: 'Images', icon: ImageIcon, type: 'explorer' },
-  { name: 'Videos', icon: Video, type: 'explorer' },
-  { name: 'This PC', icon: Monitor, type: 'explorer' },
-  { name: 'Chrome', icon: Globe, type: 'chrome' },
+const SYSTEM_SHORTCUTS = [
+  { id: 'sc_desktop',   name: 'Desktop',   Icon: PxMonitor,   color: '#000', app: 'explorer',  path: 'Desktop' },
+  { id: 'sc_downloads', name: 'Downloads', Icon: PxDownload,  color: '#000', app: 'explorer',  path: 'Downloads' },
+  { id: 'sc_docs',      name: 'Documents', Icon: PxDocument,  color: '#000', app: 'explorer',  path: 'Documents' },
+  { id: 'sc_images',    name: 'Images',    Icon: PxImage,     color: '#000', app: 'explorer',  path: 'Images' },
+  { id: 'sc_videos',    name: 'Videos',    Icon: PxVideo,     color: '#000', app: 'explorer',  path: 'Videos' },
+  { id: 'sc_thispc',    name: 'This PC',   Icon: PxHardDrive, color: '#000', app: 'explorer',  path: 'This PC' },
+  { id: 'sc_chrome',    name: 'Chrome',    Icon: PxGlobe,     color: '#000', app: 'chrome',    path: null },
+  { id: 'sc_projects',  name: 'Projects',  Icon: PxGrid4,     color: '#000', app: 'projects',  path: null },
 ]
 
-export default function Desktop() {
-  const openWindow = useStore(state => state.openWindow)
-  const clearAllWindows = useStore(state => state.clearAllWindows)
-  const closeStartMenu = useStore(state => state.closeStartMenu)
+const labelStyle = {
+  fontFamily: 'var(--font-family-pixel)',
+  fontSize: '14px',
+  color: '#000',
+  textShadow: 'none',
+  textAlign: 'center',
+  lineHeight: '1.2',
+  maxWidth: '72px',
+  wordBreak: 'break-word',
+}
 
-  const handleShortcutDoubleLick = (shortcut) => {
-    // If it's a folder, open Explorer with that path
-    // For now we just open the associated app
-    const appConfig = AppRegistry[shortcut.type]
-    if (appConfig) {
-      openWindow({
-        app: shortcut.type,
-        title: shortcut.type === 'explorer' ? shortcut.name : appConfig.title,
-        props: shortcut.type === 'explorer' ? { initialPath: shortcut.name } : {},
-        defaultSize: appConfig.defaultSize,
-        defaultPosition: appConfig.defaultPosition
-      })
+function DesktopIcon({ id, name, Icon, color, selected, onSingleClick, onDoubleClick }) {
+  const isSel = selected === id
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onSingleClick(id) }}
+      onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick() }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '10px 8px',
+        width: '84px',
+        background: isSel ? '#facc15' : 'transparent',
+        border: `2px solid ${isSel ? '#000' : 'transparent'}`,
+        cursor: 'pointer',
+        outline: 'none',
+        transition: 'none',
+      }}
+      onMouseEnter={(e) => { if (!isSel) { e.currentTarget.style.border = '2px solid #000'; e.currentTarget.style.background = 'rgba(250,204,21,0.25)' } }}
+      onMouseLeave={(e) => { if (!isSel) { e.currentTarget.style.border = '2px solid transparent'; e.currentTarget.style.background = 'transparent' } }}
+    >
+      <div style={{ width: '40px', height: '40px', color }}>
+        <Icon size={40} />
+      </div>
+      <span style={labelStyle}>{name}</span>
+    </button>
+  )
+}
+
+export default function Desktop() {
+  const { openWindow, closeStartMenu } = useStore()
+  const { fs } = useFileSystem()
+  const [selected, setSelected] = useState(null)
+  const lastClick = useRef({ id: null, time: 0 })
+
+  const handleSingleClick = useCallback((id) => {
+    setSelected(id)
+  }, [])
+
+  const handleIconInteraction = useCallback((id, action) => {
+    const now = Date.now()
+    if (lastClick.current.id === id && now - lastClick.current.time < 400) {
+      lastClick.current = { id: null, time: 0 }
+      action()
+    } else {
+      lastClick.current = { id, time: now }
+      setSelected(id)
     }
-  }
+  }, [])
+
+  const openApp = useCallback((app, title, props = {}) => {
+    openWindow({ app, title, props })
+  }, [openWindow])
 
   return (
-    <div 
-      className="absolute inset-0 bg-[#1f1f1f] bg-cover bg-center"
-      style={{ backgroundImage: `url(${bgImage})` }}
-      onClick={() => closeStartMenu()}
+    <div
+      className="absolute inset-0"
+      style={{ background: '#f0f0f0' }}
+      onClick={() => { setSelected(null); closeStartMenu() }}
     >
-      <div className="flex flex-col flex-wrap h-[calc(100vh-48px)] w-fit content-start p-2 gap-2">
-        {SHORTCUTS.map((shortcut, idx) => (
-          <div 
-            key={idx} 
-            className="w-20 p-2 flex flex-col items-center justify-center text-white hover:bg-white/10 border border-transparent hover:border-white/20 rounded shadow-sm cursor-pointer"
-            onDoubleClick={() => handleShortcutDoubleLick(shortcut)}
-          >
-            <shortcut.icon size={36} className="mb-2 drop-shadow-md" strokeWidth={1.5} />
-            <span className="text-xs text-center drop-shadow-md break-words line-clamp-2 w-full">{shortcut.name}</span>
-          </div>
+
+      {/* Icon grid */}
+      <div
+        style={{
+          position: 'relative', zIndex: 2,
+          display: 'flex', flexDirection: 'column', flexWrap: 'wrap',
+          height: 'calc(100vh - 48px)',
+          alignContent: 'flex-start',
+          padding: '16px 12px',
+          gap: '8px',
+        }}
+      >
+        {/* System shortcuts */}
+        {SYSTEM_SHORTCUTS.map((s) => (
+          <DesktopIcon
+            key={s.id}
+            id={s.id}
+            name={s.name}
+            Icon={s.Icon}
+            color={s.color}
+            selected={selected}
+            onSingleClick={handleSingleClick}
+            onDoubleClick={() => openApp(s.app, s.name, s.path ? { initialPath: s.path } : {})}
+          />
         ))}
+
+        {/* User files on desktop (from filesystem store) */}
+        {fs.desktop.map((item) => (
+          <DesktopIcon
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            Icon={item.type === 'folder' ? PxFolder : PxDocument}
+            color={item.type === 'folder' ? '#facc15' : '#60a5fa'}
+            selected={selected}
+            onSingleClick={handleSingleClick}
+            onDoubleClick={() => {
+              if (item.type === 'folder') {
+                openApp('explorer', item.name, { initialPath: item.name })
+              } else {
+                openApp('explorer', 'Desktop', { initialPath: 'Desktop' })
+              }
+            }}
+          />
+        ))}
+      </div>
+
+      {/* OS label watermark */}
+      <div style={{
+        position: 'absolute', bottom: '56px', right: '12px', zIndex: 2,
+        fontFamily: 'var(--font-family-pixel)', fontSize: '13px',
+        color: 'rgba(0,0,0,0.15)', pointerEvents: 'none', letterSpacing: '2px',
+      }}>
+        BRUTA/OS v1.0
       </div>
     </div>
   )

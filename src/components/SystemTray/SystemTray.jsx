@@ -1,121 +1,128 @@
 import React, { useEffect, useState } from 'react'
-import { ChevronUp, Wifi, Shield, Usb } from 'lucide-react'
 import { useStore } from '../../core/store'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { PxChevronUp, PxWifi, PxShield, PxUsb } from '../ui/PixelIcons'
 
 export default function SystemTray() {
-  const [time, setTime] = useState(new Date())
-  const [batteryLevel, setBatteryLevel] = useState(100)
-  const [isCharging, setIsCharging] = useState(false)
-  const [showHiddenIcons, setShowHiddenIcons] = useState(false)
-  const openWindow = useStore(state => state.openWindow)
+  const [time, setTime]               = useState(new Date())
+  const [batteryLevel, setBattery]    = useState(100)
+  const [isCharging, setIsCharging]   = useState(false)
+  const [showIcons, setShowIcons]     = useState(false)
+  const openWindow                    = useStore(state => state.openWindow)
 
   // Clock
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(timer)
+    const t = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(t)
   }, [])
 
   // Battery
   useEffect(() => {
-    if ('getBattery' in navigator) {
-      navigator.getBattery().then(battery => {
-        setBatteryLevel(Math.floor(battery.level * 100))
-        setIsCharging(battery.charging)
-
-        battery.addEventListener('levelchange', () => setBatteryLevel(Math.floor(battery.level * 100)))
-        battery.addEventListener('chargingchange', () => setIsCharging(battery.charging))
-      })
-    }
+    if (!('getBattery' in navigator)) return
+    navigator.getBattery().then(b => {
+      setBattery(Math.floor(b.level * 100))
+      setIsCharging(b.charging)
+      b.addEventListener('levelchange', () => setBattery(Math.floor(b.level * 100)))
+      b.addEventListener('chargingchange', () => setIsCharging(b.charging))
+    })
   }, [])
 
-  const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const formattedDate = time.toLocaleDateString()
+  const HH = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const DD = time.toLocaleDateString()
 
-  const openRadio = () => {
-    openWindow({
-      app: 'radio',
-      title: 'Radio',
-      defaultSize: { width: 400, height: 600 },
-      defaultPosition: { x: window.innerWidth - 420, y: window.innerHeight - 660 }
-    })
-  }
+  const openRadio = () => openWindow({
+    app: 'radio', title: 'Radio',
+    defaultSize: { width: 400, height: 560 },
+    defaultPosition: { x: window.innerWidth - 420, y: window.innerHeight - 620 },
+  })
 
   return (
     <>
-      {/* Invisible overlay for Hidden Icons popup cancellation */}
-      {showHiddenIcons && (
-        <div className="fixed inset-0 z-40" onPointerDown={() => setShowHiddenIcons(false)} />
-      )}
+      {showIcons && <div className="fixed inset-0 z-40" onPointerDown={() => setShowIcons(false)} />}
 
-      <div className="flex h-full items-center text-xs text-white relative z-50">
-        
-        {/* Hidden Icons Button */}
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`h-full px-2 flex items-center hover:bg-white/10 transition-colors cursor-pointer ${showHiddenIcons ? 'bg-white/10' : ''}`}
-          onClick={() => setShowHiddenIcons(!showHiddenIcons)}
-        >
-          <ChevronUp 
-            size={16} 
-            className={`transition-transform duration-300 ${showHiddenIcons ? 'rotate-180' : 'rotate-0'}`} 
-          />
-        </motion.div>
+      <div style={{ display: 'flex', height: '100%', alignItems: 'center', position: 'relative', zIndex: 50 }}>
 
-        {/* Hidden Icons Popup */}
+        {/* Hidden icons button */}
+        <TrayBtn onClick={() => setShowIcons(!showIcons)} active={showIcons}>
+          <PxChevronUp size={14} style={{ color: '#000', transform: showIcons ? 'rotate(180deg)' : 'none', transition: 'none' }} />
+        </TrayBtn>
+
+        {/* Hidden icons popup */}
         <AnimatePresence>
-          {showHiddenIcons && (
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
+          {showIcons && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="absolute bottom-12 left-0 w-32 bg-[#1f1f1f]/95 backdrop-blur-xl border border-[#3a3a3a] shadow-lg flex flex-wrap p-2 rounded-t-md z-[60]"
+              transition={{ duration: 0.06 }}
+              style={{
+                position: 'absolute', bottom: 52, right: 0,
+                background: '#fff', border: '3px solid #000',
+                boxShadow: '4px -4px 0 #000',
+                display: 'flex', gap: '4px', padding: '8px', zIndex: 60,
+              }}
             >
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="w-1/3 aspect-square flex items-center justify-center hover:bg-white/10 rounded cursor-pointer transition-colors text-gray-300" title="Safely Remove Hardware">
-                <Usb size={16} />
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="w-1/3 aspect-square flex items-center justify-center hover:bg-white/10 rounded cursor-pointer transition-colors text-gray-300" title="Windows Security">
-                <Shield size={15} />
-              </motion.div>
+              <TrayBtn title="Safely Remove Hardware"><PxUsb size={16} style={{ color: '#000' }} /></TrayBtn>
+              <TrayBtn title="Security"><PxShield size={16} style={{ color: '#000' }} /></TrayBtn>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Network / Battery / Volume cluster */}
-        <motion.div 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="h-full px-2 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer"
-          onClick={openRadio}
-        >
-          <Wifi size={15} />
-          {/* Basic Battery Icon Representation */}
-          <div className="flex items-center gap-1" title={`${batteryLevel}% ${isCharging ? '(Charging)' : ''}`}>
-            <div className="w-5 h-[10px] border border-white rounded-[2px] p-[1px] flex relative">
-              <div 
-                className={`h-full bg-white transition-all ${batteryLevel < 20 && !isCharging ? 'bg-red-500' : ''}`}
-                style={{ width: `${batteryLevel}%` }}
-              />
-              {isCharging && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-green-500 font-bold mix-blend-difference">⚡</div>}
-            </div>
+        {/* Network + Battery (click opens radio) */}
+        <TrayBtn onClick={openRadio} title="Radio">
+          <PxWifi size={16} style={{ color: '#000' }} />
+          {/* Battery bar */}
+          <div style={{ width: 18, height: 8, border: '2px solid #000', padding: '1px', display: 'flex', position: 'relative' }}>
+            <div style={{
+              flex: batteryLevel / 100,
+              background: batteryLevel < 20 && !isCharging ? '#ff003c' : '#000',
+            }} />
+            {isCharging && (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6px', color: '#facc15' }}>⚡</div>
+            )}
           </div>
-        </motion.div>
+        </TrayBtn>
 
-        {/* Time & Date */}
-        <motion.div 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="h-full px-2 flex flex-col items-center justify-center hover:bg-white/10 transition-colors cursor-pointer min-w-[70px]"
-        >
-          <span>{formattedTime}</span>
-          <span>{formattedDate}</span>
-        </motion.div>
-        
-        {/* Show Desktop sliver */}
-        <div className="w-1.5 h-full border-l border-gray-600 hover:bg-white/20 cursor-pointer" title="Show Desktop"></div>
+        {/* Clock */}
+        <TrayBtn style={{ flexDirection: 'column', gap: '1px', minWidth: 76, padding: '0 12px' }}>
+          <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '15px', color: '#000', lineHeight: 1 }}>{HH}</span>
+          <span style={{ fontFamily: 'var(--font-family-sans)', fontSize: '10px', color: '#555', lineHeight: 1 }}>{DD}</span>
+        </TrayBtn>
+
+        {/* Show desktop sliver */}
+        <div
+          style={{
+            width: 6, height: '100%',
+            borderLeft: '2px solid #000',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(250,204,21,0.4)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          title="Show Desktop"
+        />
       </div>
     </>
+  )
+}
+
+function TrayBtn({ children, onClick, title, active, style = {} }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        height: '100%', padding: '0 8px',
+        display: 'flex', alignItems: 'center', gap: '5px',
+        background: hov || active ? 'rgba(250,204,21,0.4)' : 'transparent',
+        border: 'none', cursor: 'pointer', outline: 'none',
+        transition: 'none', color: '#000',
+        ...style,
+      }}
+    >
+      {children}
+    </button>
   )
 }
