@@ -2,19 +2,12 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useStore } from '../../core/store'
 import { useFileSystem } from '../../core/fileSystemStore'
 import {
-  PxMonitor, PxDownload, PxDocument, PxImage, PxVideo,
-  PxHardDrive, PxGlobe, PxGrid4, PxFolder,
+  PxDocument, PxGlobe, PxGrid4, PxFolder,
 } from '../ui/PixelIcons'
 
 const SYSTEM_SHORTCUTS = [
-  { id: 'sc_desktop',   name: 'Desktop',   Icon: PxMonitor,   color: '#000', app: 'explorer',  path: 'Desktop' },
-  { id: 'sc_downloads', name: 'Downloads', Icon: PxDownload,  color: '#000', app: 'explorer',  path: 'Downloads' },
-  { id: 'sc_docs',      name: 'Documents', Icon: PxDocument,  color: '#000', app: 'explorer',  path: 'Documents' },
-  { id: 'sc_images',    name: 'Images',    Icon: PxImage,     color: '#000', app: 'explorer',  path: 'Images' },
-  { id: 'sc_videos',    name: 'Videos',    Icon: PxVideo,     color: '#000', app: 'explorer',  path: 'Videos' },
-  { id: 'sc_thispc',    name: 'This PC',   Icon: PxHardDrive, color: '#000', app: 'explorer',  path: 'This PC' },
-  { id: 'sc_chrome',    name: 'Chrome',    Icon: PxGlobe,     color: '#000', app: 'chrome',    path: null },
-  { id: 'sc_projects',  name: 'Projects',  Icon: PxGrid4,     color: '#000', app: 'projects',  path: null },
+  { id: 'sc_projects',  name: 'Projects',  Icon: PxGrid4,  color: '#000', app: 'projects', path: null },
+  { id: 'sc_chrome',    name: 'Chrome',    Icon: PxGlobe,  color: '#000', app: 'chrome',   path: null },
 ]
 
 const labelStyle = {
