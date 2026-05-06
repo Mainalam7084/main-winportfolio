@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth } from '../ui/PixelIcons'
+import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth, PxRadio, PxPlay, PxPause, PxSkipBack, PxSkipForward } from '../ui/PixelIcons'
+import { useRadioStore, MOCK_STATIONS } from '../../core/radioStore'
 
 const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER']
 const DAYS   = ['SUN','MON','TUE','WED','THU','FRI','SAT']
@@ -11,10 +12,15 @@ export default function SystemTray() {
   const [isCharging, setIsCharging] = useState(false)
   const [showIcons, setShowIcons]   = useState(false)
   const [showPanel, setShowPanel]   = useState(false)
+  const [showRadio, setShowRadio]   = useState(false)
   const [showClock, setShowClock]   = useState(false)
   const [wifi, setWifi]             = useState(true)
   const [bluetooth, setBluetooth]   = useState(false)
   const [calDate, setCalDate]       = useState(new Date())
+
+  const { isPlaying, isBuffering, currentStation, error, togglePlay, playNext, playPrev, setStation, initAudio } = useRadioStore()
+
+  useEffect(() => { initAudio() }, [initAudio])
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
@@ -39,7 +45,7 @@ export default function SystemTray() {
   const SS = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
   const DD = time.toLocaleDateString()
 
-  const closeAll = () => { setShowPanel(false); setShowIcons(false) }
+  const closeAll = () => { setShowPanel(false); setShowIcons(false); setShowRadio(false) }
 
   const calYear    = calDate.getFullYear()
   const calMonth   = calDate.getMonth()
@@ -56,7 +62,7 @@ export default function SystemTray() {
 
   return (
     <>
-      {(showIcons || showPanel) && (
+      {(showIcons || showPanel || showRadio) && (
         <div className="fixed inset-0 z-40" onPointerDown={closeAll} />
       )}
 
@@ -158,6 +164,102 @@ export default function SystemTray() {
                   <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#000', flexShrink: 0 }}>
                     {isCharging ? '⚡ ' : ''}{batteryLevel}%
                   </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Radio ── */}
+        <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
+          <TrayBtn
+            onClick={() => { setShowRadio(v => !v); setShowPanel(false); setShowIcons(false) }}
+            title="Radio"
+            active={showRadio}
+          >
+            <PxRadio size={16} style={{ color: isPlaying ? '#000' : '#888' }} />
+          </TrayBtn>
+
+          <AnimatePresence>
+            {showRadio && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.08 }}
+                style={{
+                  position: 'absolute', bottom: 52, right: 0,
+                  width: 260,
+                  background: '#fff', border: '3px solid #000',
+                  boxShadow: '4px -4px 0 #000', zIndex: 60,
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Header */}
+                <div style={{ background: '#000', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <PxRadio size={14} style={{ color: '#facc15', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#fff', letterSpacing: '1px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    RADIO
+                  </span>
+                  {/* Live indicator */}
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '9px', color: isPlaying ? '#facc15' : '#555', letterSpacing: '1px' }}>
+                    {isBuffering ? 'LOADING' : isPlaying ? '◉ LIVE' : 'OFF'}
+                  </span>
+                </div>
+
+                {/* Current station */}
+                <div style={{ padding: '10px 14px 6px', borderBottom: '2px solid #e5e5e5' }}>
+                  <div style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '10px', color: '#777', letterSpacing: '1px', marginBottom: '3px' }}>
+                    NOW PLAYING
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-family-sans)', fontSize: '12px', color: '#000', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentStation.name}
+                  </div>
+                  {error && (
+                    <div style={{ fontFamily: 'var(--font-family-sans)', fontSize: '10px', color: '#ff003c', marginTop: '3px' }}>
+                      {error}
+                    </div>
+                  )}
+                </div>
+
+                {/* Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 14px', borderBottom: '2px solid #e5e5e5' }}>
+                  <RadioBtn onClick={playPrev}><PxSkipBack size={13} style={{ color: '#000' }} /></RadioBtn>
+                  <RadioBtn onClick={togglePlay} primary>
+                    {isPlaying
+                      ? <PxPause size={15} style={{ color: '#000' }} />
+                      : <PxPlay  size={15} style={{ color: '#000' }} />}
+                  </RadioBtn>
+                  <RadioBtn onClick={playNext}><PxSkipForward size={13} style={{ color: '#000' }} /></RadioBtn>
+                </div>
+
+                {/* Station list */}
+                <div style={{ padding: '6px 0' }}>
+                  {MOCK_STATIONS.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setStation(s)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        width: '100%', padding: '7px 14px',
+                        background: currentStation.id === s.id ? '#facc15' : 'transparent',
+                        border: 'none', cursor: 'pointer', outline: 'none',
+                        borderLeft: currentStation.id === s.id ? '3px solid #000' : '3px solid transparent',
+                        transition: 'none',
+                      }}
+                      onMouseEnter={(e) => { if (currentStation.id !== s.id) e.currentTarget.style.background = 'rgba(250,204,21,0.2)' }}
+                      onMouseLeave={(e) => { if (currentStation.id !== s.id) e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <div style={{
+                        width: 8, height: 8, flexShrink: 0,
+                        background: currentStation.id === s.id && isPlaying ? '#000' : 'transparent',
+                        border: '2px solid #000',
+                      }} />
+                      <span style={{ fontFamily: 'var(--font-family-sans)', fontSize: '11px', color: '#000', textAlign: 'left' }}>
+                        {s.name}
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -267,6 +369,26 @@ export default function SystemTray() {
         />
       </div>
     </>
+  )
+}
+
+function RadioBtn({ onClick, children, primary }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: 32, height: 32,
+        background: primary ? '#facc15' : '#f0f0f0',
+        border: '2px solid #000',
+        boxShadow: '2px 2px 0 #000',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', outline: 'none', transition: 'none',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '3px 3px 0 #facc15' }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '2px 2px 0 #000' }}
+    >
+      {children}
+    </button>
   )
 }
 
