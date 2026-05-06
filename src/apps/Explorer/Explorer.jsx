@@ -188,12 +188,33 @@ export default function Explorer({ initialPath = 'This PC' }) {
               )}
               {preview.mimeType?.startsWith('video/') && (
                 <video
-                  src={preview.url} controls
+                  src={preview.url} controls autoPlay
                   onClick={e => e.stopPropagation()}
                   style={{ maxWidth: '90%', maxHeight: '75%', border: '4px solid #fff' }}
                 />
               )}
-              <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '14px', color: '#fff' }}>{preview.name}</span>
+              {preview.mimeType === 'application/pdf' && (
+                <iframe
+                  src={preview.url}
+                  title={preview.name}
+                  onClick={e => e.stopPropagation()}
+                  style={{ width: '80%', height: '75%', border: '4px solid #fff', background: '#fff' }}
+                />
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '14px', color: '#fff' }}>{preview.name}</span>
+                {preview.url && (
+                  <a
+                    href={preview.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    style={{ ...toolBtn, background: '#333', color: '#fff', border: '2px solid #fff', textDecoration: 'none', fontSize: '11px' }}
+                  >
+                    OPEN ↗
+                  </a>
+                )}
+              </div>
               <button
                 onClick={() => setPreview(null)}
                 style={{ ...toolBtn, background: '#facc15', border: '2px solid #000', boxShadow: '3px 3px 0 #000' }}
