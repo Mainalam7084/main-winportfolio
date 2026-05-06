@@ -2,19 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth } from '../ui/PixelIcons'
 
+const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER']
+const DAYS   = ['SUN','MON','TUE','WED','THU','FRI','SAT']
+
 export default function SystemTray() {
   const [time, setTime]             = useState(new Date())
   const [batteryLevel, setBattery]  = useState(100)
   const [isCharging, setIsCharging] = useState(false)
   const [showIcons, setShowIcons]   = useState(false)
   const [showPanel, setShowPanel]   = useState(false)
+  const [showClock, setShowClock]   = useState(false)
   const [wifi, setWifi]             = useState(true)
   const [bluetooth, setBluetooth]   = useState(false)
+  const [calDate, setCalDate]       = useState(new Date())
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
+
+  useEffect(() => {
+    if (showClock) setCalDate(new Date())
+  }, [showClock])
 
   useEffect(() => {
     if (!('getBattery' in navigator)) return
@@ -27,9 +36,23 @@ export default function SystemTray() {
   }, [])
 
   const HH = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const SS = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
   const DD = time.toLocaleDateString()
 
   const closeAll = () => { setShowPanel(false); setShowIcons(false) }
+
+  const calYear    = calDate.getFullYear()
+  const calMonth   = calDate.getMonth()
+  const firstDay   = new Date(calYear, calMonth, 1).getDay()
+  const daysInMo   = new Date(calYear, calMonth + 1, 0).getDate()
+  const isToday    = (d) => d === time.getDate() && calMonth === time.getMonth() && calYear === time.getFullYear()
+
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMo; d++) cells.push(d)
+
+  const prevMonth = (e) => { e.stopPropagation(); setCalDate(new Date(calYear, calMonth - 1, 1)) }
+  const nextMonth = (e) => { e.stopPropagation(); setCalDate(new Date(calYear, calMonth + 1, 1)) }
 
   return (
     <>
@@ -37,144 +60,205 @@ export default function SystemTray() {
         <div className="fixed inset-0 z-40" onPointerDown={closeAll} />
       )}
 
-      <div style={{ display: 'flex', height: '100%', alignItems: 'center', position: 'relative', zIndex: 50 }}>
+      <div style={{ display: 'flex', height: '100%', alignItems: 'center', zIndex: 50 }}>
 
-        {/* Hidden icons toggle */}
-        <TrayBtn onClick={() => { setShowIcons(v => !v); setShowPanel(false) }} active={showIcons}>
-          <PxChevronUp
-            size={14}
-            style={{ color: '#000', transform: showIcons ? 'rotate(180deg)' : 'none', transition: 'none' }}
-          />
-        </TrayBtn>
+        {/* ── Hidden icons toggle ── */}
+        <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
+          <TrayBtn onClick={() => { setShowIcons(v => !v); setShowPanel(false) }} active={showIcons}>
+            <PxChevronUp
+              size={14}
+              style={{ color: '#000', transform: showIcons ? 'rotate(180deg)' : 'none', transition: 'none' }}
+            />
+          </TrayBtn>
 
-        {/* Hidden icons popup */}
-        <AnimatePresence>
-          {showIcons && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.06 }}
-              style={{
-                position: 'absolute', bottom: 52, right: 0,
-                background: '#fff', border: '3px solid #000',
-                boxShadow: '4px -4px 0 #000',
-                display: 'flex', gap: '4px', padding: '8px', zIndex: 60,
-              }}
-            >
-              <TrayBtn title="Safely Remove Hardware"><PxUsb size={16} style={{ color: '#000' }} /></TrayBtn>
-              <TrayBtn title="Security"><PxShield size={16} style={{ color: '#000' }} /></TrayBtn>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Network + Battery — opens quick settings panel */}
-        <TrayBtn
-          onClick={() => { setShowPanel(v => !v); setShowIcons(false) }}
-          title="Quick Settings"
-          active={showPanel}
-        >
-          <PxWifi size={16} style={{ color: wifi ? '#000' : '#aaa' }} />
-          <div style={{ width: 18, height: 8, border: '2px solid #000', padding: '1px', display: 'flex', position: 'relative' }}>
-            <div style={{
-              flex: batteryLevel / 100,
-              background: batteryLevel < 20 && !isCharging ? '#ff003c' : '#000',
-            }} />
-            {isCharging && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6px', color: '#facc15' }}>⚡</div>
+          <AnimatePresence>
+            {showIcons && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.06 }}
+                style={{
+                  position: 'absolute', bottom: 52, right: 0,
+                  background: '#fff', border: '3px solid #000',
+                  boxShadow: '4px -4px 0 #000',
+                  display: 'flex', gap: '4px', padding: '8px', zIndex: 60,
+                }}
+              >
+                <TrayBtn title="Safely Remove Hardware"><PxUsb size={16} style={{ color: '#000' }} /></TrayBtn>
+                <TrayBtn title="Security"><PxShield size={16} style={{ color: '#000' }} /></TrayBtn>
+              </motion.div>
             )}
-          </div>
-        </TrayBtn>
+          </AnimatePresence>
+        </div>
 
-        {/* Quick Settings Panel */}
-        <AnimatePresence>
-          {showPanel && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.98 }}
-              transition={{ duration: 0.08 }}
-              style={{
-                position: 'absolute',
-                bottom: 52,
-                right: 0,
-                width: 300,
-                background: '#fff',
-                border: '3px solid #000',
-                boxShadow: '4px -4px 0 #000',
-                zIndex: 60,
-              }}
-            >
-              {/* Header */}
+        {/* ── Network + Battery (Quick Settings) ── */}
+        <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
+          <TrayBtn
+            onClick={() => { setShowPanel(v => !v); setShowIcons(false) }}
+            title="Quick Settings"
+            active={showPanel}
+          >
+            <PxWifi size={16} style={{ color: wifi ? '#000' : '#aaa' }} />
+            <div style={{ width: 18, height: 8, border: '2px solid #000', padding: '1px', display: 'flex', position: 'relative' }}>
               <div style={{
-                background: '#000',
-                padding: '9px 14px',
-                borderBottom: '2px solid #000',
-              }}>
-                <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#fff', letterSpacing: '1px' }}>
-                  QUICK SETTINGS
-                </span>
-              </div>
+                flex: batteryLevel / 100,
+                background: batteryLevel < 20 && !isCharging ? '#ff003c' : '#000',
+              }} />
+              {isCharging && (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6px', color: '#facc15' }}>⚡</div>
+              )}
+            </div>
+          </TrayBtn>
 
-              {/* Toggle tiles */}
-              <div style={{ padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <ToggleTile
-                  icon={<PxWifi size={22} style={{ color: wifi ? '#000' : '#aaa' }} />}
-                  label="WI-FI"
-                  sub={wifi ? 'Connected' : 'Off'}
-                  active={wifi}
-                  onClick={() => setWifi(v => !v)}
-                />
-                <ToggleTile
-                  icon={<PxBluetooth size={22} style={{ color: bluetooth ? '#000' : '#aaa' }} />}
-                  label="BLUETOOTH"
-                  sub={bluetooth ? 'On' : 'Off'}
-                  active={bluetooth}
-                  onClick={() => setBluetooth(v => !v)}
-                />
-              </div>
-
-              {/* Battery row */}
-              <div style={{
-                borderTop: '2px solid #e5e5e5',
-                padding: '10px 14px',
-                display: 'flex', alignItems: 'center', gap: '10px',
-              }}>
-                <span style={{
-                  fontFamily: 'var(--font-family-pixel)', fontSize: '11px',
-                  color: '#777', letterSpacing: '1px', flexShrink: 0,
-                }}>
-                  BATTERY
-                </span>
-                <div style={{
-                  flex: 1, height: 8,
-                  border: '2px solid #000', padding: '1px',
-                  display: 'flex', overflow: 'hidden',
-                }}>
-                  <div style={{
-                    width: `${batteryLevel}%`,
-                    background: batteryLevel < 20 && !isCharging ? '#ff003c' : '#000',
-                    transition: 'none',
-                  }} />
+          <AnimatePresence>
+            {showPanel && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.08 }}
+                style={{
+                  position: 'absolute', bottom: 52, right: 0,
+                  width: 300,
+                  background: '#fff', border: '3px solid #000',
+                  boxShadow: '4px -4px 0 #000', zIndex: 60,
+                }}
+              >
+                <div style={{ background: '#000', padding: '9px 14px', borderBottom: '2px solid #000' }}>
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#fff', letterSpacing: '1px' }}>
+                    QUICK SETTINGS
+                  </span>
                 </div>
-                <span style={{
-                  fontFamily: 'var(--font-family-pixel)', fontSize: '11px',
-                  color: '#000', flexShrink: 0,
+
+                <div style={{ padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <ToggleTile
+                    icon={<PxWifi size={22} style={{ color: wifi ? '#000' : '#aaa' }} />}
+                    label="WI-FI"
+                    sub={wifi ? 'Connected' : 'Off'}
+                    active={wifi}
+                    onClick={() => setWifi(v => !v)}
+                  />
+                  <ToggleTile
+                    icon={<PxBluetooth size={22} style={{ color: bluetooth ? '#000' : '#aaa' }} />}
+                    label="BLUETOOTH"
+                    sub={bluetooth ? 'On' : 'Off'}
+                    active={bluetooth}
+                    onClick={() => setBluetooth(v => !v)}
+                  />
+                </div>
+
+                <div style={{ borderTop: '2px solid #e5e5e5', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#777', letterSpacing: '1px', flexShrink: 0 }}>
+                    BATTERY
+                  </span>
+                  <div style={{ flex: 1, height: 8, border: '2px solid #000', padding: '1px', display: 'flex', overflow: 'hidden' }}>
+                    <div style={{ width: `${batteryLevel}%`, background: batteryLevel < 20 && !isCharging ? '#ff003c' : '#000', transition: 'none' }} />
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#000', flexShrink: 0 }}>
+                    {isCharging ? '⚡ ' : ''}{batteryLevel}%
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Clock + Calendar (hover) ── */}
+        <div
+          style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}
+          onMouseEnter={() => setShowClock(true)}
+          onMouseLeave={() => setShowClock(false)}
+        >
+          <TrayBtn style={{ flexDirection: 'column', gap: '1px', minWidth: 80, padding: '0 10px' }}>
+            <span style={{
+              fontFamily: 'var(--font-family-pixel)', fontSize: '15px', color: '#000',
+              lineHeight: 1, textAlign: 'center', width: '100%', display: 'block',
+            }}>
+              {HH}
+            </span>
+            <span style={{
+              fontFamily: 'var(--font-family-sans)', fontSize: '10px', color: '#555',
+              lineHeight: 1, textAlign: 'center', width: '100%', display: 'block',
+            }}>
+              {DD}
+            </span>
+          </TrayBtn>
+
+          <AnimatePresence>
+            {showClock && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.08 }}
+                style={{
+                  position: 'absolute', bottom: 52, right: 0,
+                  width: 280,
+                  background: '#fff', border: '3px solid #000',
+                  boxShadow: '4px -4px 0 #000', zIndex: 60,
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Live time */}
+                <div style={{ background: '#000', padding: '16px 12px', textAlign: 'center' }}>
+                  <div style={{
+                    fontFamily: 'var(--font-family-pixel)', fontSize: '32px',
+                    color: '#facc15', letterSpacing: '2px', lineHeight: 1,
+                  }}>
+                    {SS}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-family-sans)', fontSize: '11px', color: '#aaa', marginTop: '6px' }}>
+                    {time.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </div>
+                </div>
+
+                {/* Month nav */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px 6px', borderBottom: '2px solid #000',
                 }}>
-                  {isCharging ? '⚡ ' : ''}{batteryLevel}%
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  <NavBtn onClick={prevMonth}>◀</NavBtn>
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#000', letterSpacing: '1px' }}>
+                    {MONTHS[calMonth]} {calYear}
+                  </span>
+                  <NavBtn onClick={nextMonth}>▶</NavBtn>
+                </div>
 
-        {/* Clock */}
-        <TrayBtn style={{ flexDirection: 'column', gap: '1px', minWidth: 76, padding: '0 12px' }}>
-          <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '15px', color: '#000', lineHeight: 1 }}>{HH}</span>
-          <span style={{ fontFamily: 'var(--font-family-sans)', fontSize: '10px', color: '#555', lineHeight: 1 }}>{DD}</span>
-        </TrayBtn>
+                {/* Day-of-week headers */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '6px 10px 2px', gap: 2 }}>
+                  {DAYS.map(d => (
+                    <div key={d} style={{
+                      textAlign: 'center',
+                      fontFamily: 'var(--font-family-pixel)', fontSize: '7px',
+                      color: '#888', letterSpacing: '0.3px',
+                    }}>
+                      {d}
+                    </div>
+                  ))}
+                </div>
 
-        {/* Show-desktop sliver */}
+                {/* Calendar grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '2px 10px 12px', gap: 2 }}>
+                  {cells.map((d, i) => (
+                    <div key={i} style={{
+                      textAlign: 'center',
+                      fontFamily: 'var(--font-family-pixel)', fontSize: '10px',
+                      padding: '3px 0', lineHeight: 1,
+                      background: d && isToday(d) ? '#facc15' : 'transparent',
+                      border: d && isToday(d) ? '2px solid #000' : '2px solid transparent',
+                      color: '#000',
+                    }}>
+                      {d ?? ''}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Show-desktop sliver ── */}
         <div
           style={{ width: 6, height: '100%', borderLeft: '2px solid #000', cursor: 'pointer' }}
           onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(250,204,21,0.4)'}
@@ -183,6 +267,22 @@ export default function SystemTray() {
         />
       </div>
     </>
+  )
+}
+
+function NavBtn({ onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: 'none', border: 'none', cursor: 'pointer',
+        fontFamily: 'var(--font-family-pixel)', fontSize: '12px',
+        color: '#000', padding: '2px 6px',
+        lineHeight: 1,
+      }}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -203,10 +303,7 @@ function ToggleTile({ icon, label, sub, active, onClick }) {
       }}
     >
       {icon}
-      <span style={{
-        fontFamily: 'var(--font-family-pixel)', fontSize: '11px',
-        color: '#000', letterSpacing: '0.5px', marginTop: '4px',
-      }}>
+      <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#000', letterSpacing: '0.5px', marginTop: '4px' }}>
         {label}
       </span>
       <span style={{ fontFamily: 'var(--font-family-sans)', fontSize: '10px', color: '#666' }}>
@@ -226,7 +323,7 @@ function TrayBtn({ children, onClick, title, active, style = {} }) {
       onMouseLeave={() => setHov(false)}
       style={{
         height: '100%', padding: '0 8px',
-        display: 'flex', alignItems: 'center', gap: '5px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
         background: hov || active ? 'rgba(250,204,21,0.4)' : 'transparent',
         border: 'none', cursor: 'pointer', outline: 'none',
         transition: 'none', color: '#000',
