@@ -11,7 +11,7 @@ const FS_KEY = {
   Desktop:    'desktop',
   Downloads:  'downloads',
   Documents:  'documents',
-  Images:     'images',
+  Photos:     'photos',
   Videos:     'videos',
 }
 
@@ -20,7 +20,7 @@ const SIDEBAR = [
   { label: 'Desktop',   key: 'Desktop',   Icon: PxMonitor,   color: '#000' },
   { label: 'Downloads', key: 'Downloads', Icon: PxDownload,  color: '#000' },
   { label: 'Documents', key: 'Documents', Icon: PxDocument,  color: '#000' },
-  { label: 'Images',    key: 'Images',    Icon: PxImage,     color: '#000' },
+  { label: 'Photos',    key: 'Photos',    Icon: PxImage,     color: '#000' },
   { label: 'Videos',    key: 'Videos',    Icon: PxVideo,     color: '#000' },
   { label: 'THIS PC',   isLabel: true },
   { label: 'Local Disk (C:)', key: 'This PC', Icon: PxHardDrive, color: '#000' },
@@ -28,8 +28,14 @@ const SIDEBAR = [
 
 function getIconInfo(item) {
   if (item.type === 'folder') return { Icon: PxFolder,   color: '#000' }
-  if (item.mimeType?.startsWith('image/')) return { Icon: PxImage,    color: '#555' }
-  if (item.mimeType?.startsWith('video/')) return { Icon: PxVideo,    color: '#555' }
+  const mime = item.mimeType || ''
+  if (mime.startsWith('image/'))        return { Icon: PxImage,    color: '#555' }
+  if (mime.startsWith('video/'))        return { Icon: PxVideo,    color: '#555' }
+  if (mime === 'application/pdf')       return { Icon: PxDocument, color: '#000' }
+  // Derive from file extension as fallback
+  const ext = item.name?.split('.').pop()?.toLowerCase()
+  if (['jpg','jpeg','png','gif','webp','avif'].includes(ext)) return { Icon: PxImage,    color: '#555' }
+  if (['mp4','webm','mov','avi','mkv'].includes(ext))         return { Icon: PxVideo,    color: '#555' }
   return { Icon: PxDocument, color: '#555' }
 }
 

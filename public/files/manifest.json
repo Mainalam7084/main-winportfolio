@@ -1,0 +1,29 @@
+{
+  "documents": [
+    {
+      "id": "cv_en",
+      "name": "CV_English.pdf",
+      "type": "file",
+      "mimeType": "application/pdf",
+      "url": "/files/documents/CV_HOSSAIN_AKTER_MAIN_ALAM_EN.pdf"
+    },
+    {
+      "id": "cv_es",
+      "name": "CV_Español.pdf",
+      "type": "file",
+      "mimeType": "application/pdf",
+      "url": "/files/documents/CV_HOSSAIN_AKTER_MAIN_ALAM_ES.pdf"
+    }
+  ],
+  "photos": [],
+  "videos": [
+    {
+      "id": "Ai_video",
+      "name": "Ai_video.mp4",
+      "type": "video",
+      "mimeType": "video/mp4",
+      "url": "/files/videos/Ai_video.mp4"
+    }
+  ],
+  "downloads": []
+}

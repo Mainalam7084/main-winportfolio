@@ -1,4 +1,4 @@
-import { PxFolder, PxGlobe, PxRadio, PxGrid4, PxUser, PxMail } from '../components/ui/PixelIcons'
+import { PxFolder, PxGlobe, PxRadio, PxGrid4, PxUser, PxMail, PxCamera } from '../components/ui/PixelIcons'
 
 import Explorer   from '../apps/Explorer/Explorer'
 import ChromeApp  from '../apps/Chrome/Chrome'
@@ -6,6 +6,7 @@ import RadioApp   from '../apps/Radio/Radio'
 import Projects   from '../apps/Projects/Projects'
 import About      from '../apps/About/About'
 import Contact    from '../apps/Contact/Contact'
+import Gallery    from '../apps/Gallery/Gallery'
 
 export const AppRegistry = {
   explorer: {
@@ -55,5 +56,13 @@ export const AppRegistry = {
     component: Contact,
     defaultSize: { width: 520, height: 540 },
     defaultPosition: { x: 200, y: 100 },
+  },
+  gallery: {
+    id: 'gallery',
+    title: 'Gallery',
+    icon: PxCamera,
+    component: Gallery,
+    defaultSize: { width: 860, height: 600 },
+    defaultPosition: { x: 120, y: 70 },
   },
 }

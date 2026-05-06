@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useStore } from '../../core/store'
 import { useFileSystem } from '../../core/fileSystemStore'
 import {
@@ -6,10 +6,10 @@ import {
 } from '../ui/PixelIcons'
 
 const SYSTEM_SHORTCUTS = [
-  { id: 'sc_projects',  name: 'Projects',  Icon: PxGrid4,  color: '#000', app: 'projects', path: null },
-  { id: 'sc_chrome',    name: 'Chrome',    Icon: PxGlobe,  color: '#000', app: 'chrome',   path: null },
-  { id: 'sc_about',     name: 'About',     Icon: PxUser,   color: '#000', app: 'about',    path: null },
-  { id: 'sc_contact',   name: 'Contact',   Icon: PxMail,   color: '#000', app: 'contact',  path: null },
+  { id: 'sc_projects', name: 'Projects', Icon: PxGrid4, color: '#000', app: 'projects', path: null },
+  { id: 'sc_chrome',   name: 'Chrome',   Icon: PxGlobe, color: '#000', app: 'chrome',   path: null },
+  { id: 'sc_about',    name: 'About',    Icon: PxUser,  color: '#000', app: 'about',    path: null },
+  { id: 'sc_contact',  name: 'Contact',  Icon: PxMail,  color: '#000', app: 'contact',  path: null },
 ]
 
 const labelStyle = {
@@ -57,7 +57,6 @@ export default function Desktop() {
   const { openWindow, closeStartMenu } = useStore()
   const { fs } = useFileSystem()
   const [selected, setSelected] = useState(null)
-  const lastClick = useRef({ id: null, time: 0 })
 
   // ── Wallpaper glitch ──
   const [wallpaper, setWallpaper] = useState('normal')
@@ -103,17 +102,6 @@ export default function Desktop() {
 
   const handleSingleClick = useCallback((id) => {
     setSelected(id)
-  }, [])
-
-  const handleIconInteraction = useCallback((id, action) => {
-    const now = Date.now()
-    if (lastClick.current.id === id && now - lastClick.current.time < 400) {
-      lastClick.current = { id: null, time: 0 }
-      action()
-    } else {
-      lastClick.current = { id, time: now }
-      setSelected(id)
-    }
   }, [])
 
   const openApp = useCallback((app, title, props = {}) => {

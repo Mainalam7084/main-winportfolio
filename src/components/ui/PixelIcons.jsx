@@ -393,6 +393,16 @@ export const PxRefresh = ({ size = 24, className = '', style: xStyle, ...rest })
   </svg>
 )
 
+export const PxCamera = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="1" y="5" width="14" height="9"/>
+    <rect x="5" y="3" width="6" height="2"/>
+    <rect x="12" y="6" width="2" height="2" fill="#fff" opacity="0.5"/>
+    <rect x="5" y="6" width="6" height="6" fill="#fff" opacity="0.15"/>
+    <rect x="6" y="7" width="4" height="4" fill="#fff" opacity="0.15"/>
+  </svg>
+)
+
 export const PxUser = ({ size = 24, className = '', style: xStyle, ...rest }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
     <rect x="5" y="1" width="6" height="5"/>
