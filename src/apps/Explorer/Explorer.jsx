@@ -53,10 +53,9 @@ export default function Explorer({ initialPath = 'This PC' }) {
   const [histIdx, setHistIdx] = useState(0)
   const [selected, setSelected] = useState(null)
   const [preview, setPreview] = useState(null)
-  const { fs, uploadToFolder } = useFileSystem()
+  const { fs } = useFileSystem()
   const openWindow = useStore(state => state.openWindow)
   const lastClick = useRef({ id: null, time: 0 })
-  const fileInputRef = useRef(null)
 
   const navigate = (path) => {
     const next = history.slice(0, histIdx + 1)
@@ -84,7 +83,6 @@ export default function Explorer({ initialPath = 'This PC' }) {
 
     if (lastClick.current.id === itemId && now - lastClick.current.time < 400) {
       lastClick.current = { id: null, time: 0 }
-      // Double-click action
       if (item.type === 'folder') {
         if (item.path === '/projects') {
           openWindow({ app: 'projects', title: 'Projects', props: {} })
@@ -97,12 +95,6 @@ export default function Explorer({ initialPath = 'This PC' }) {
     } else {
       lastClick.current = { id: itemId, time: now }
     }
-  }
-
-  const handleUpload = (e) => {
-    if (!fsKey) return
-    Array.from(e.target.files).forEach(f => uploadToFolder(fsKey, f))
-    e.target.value = ''
   }
 
   return (
@@ -127,19 +119,6 @@ export default function Explorer({ initialPath = 'This PC' }) {
           <PxFolder size={14} className="shrink-0" style={{ color: '#000' }} />
           <span>{currentPath}</span>
         </div>
-
-        {/* Upload — only available inside real folders */}
-        {fsKey && (
-          <>
-            <button
-              style={{ ...toolBtn, background: '#facc15', border: '2px solid #000', boxShadow: '2px 2px 0 #000' }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              ↑ UPLOAD
-            </button>
-            <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={handleUpload} />
-          </>
-        )}
       </div>
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -160,8 +139,9 @@ export default function Explorer({ initialPath = 'This PC' }) {
                   cursor: 'pointer', textAlign: 'left',
                   color: '#000',
                   background: currentPath === item.key ? '#facc15' : 'transparent',
+                  borderTop: 'none', borderRight: 'none', borderBottom: 'none',
                   borderLeft: `3px solid ${currentPath === item.key ? '#000' : 'transparent'}`,
-                  fontSize: '12px', border: 'none', outline: 'none',
+                  fontSize: '12px', outline: 'none',
                   display: 'flex', alignItems: 'center', gap: '8px',
                   transition: 'none',
                 }}

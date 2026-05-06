@@ -4,7 +4,7 @@ export const useStore = create((set) => ({
   // Window Management
   windows: [],
   activeWindowId: null,
-  maxZIndex: 1,
+  maxZIndex: 10,
 
   // Start Menu
   isStartMenuOpen: false,

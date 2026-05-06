@@ -128,7 +128,7 @@ export default function Desktop() {
   return (
     <div
       className="absolute inset-0"
-      style={{ background: '#f0f0f0' }}
+      style={{ background: '#f0f0f0', zIndex: 0 }}
       onClick={() => { setSelected(null); closeStartMenu() }}
     >
 

@@ -38,20 +38,4 @@ export const useFileSystem = create((set, get) => ({
     persist(next)
     set({ fs: next })
   },
-
-  uploadToFolder: (folder, rawFile) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      get().addFile(folder, {
-        id: `f_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        type: 'file',
-        name: rawFile.name,
-        url: e.target.result,
-        mimeType: rawFile.type,
-        size: rawFile.size,
-        createdAt: Date.now(),
-      })
-    }
-    reader.readAsDataURL(rawFile)
-  },
 }))
