@@ -70,6 +70,7 @@ export default function Explorer({ initialPath = 'This PC' }) {
     setHistIdx(next.length - 1)
     setCurrentPath(path)
     setSelected(null)
+    setPreview(null)
   }
 
   const goBack = () => {
