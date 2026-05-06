@@ -363,6 +363,19 @@ export const PxStar = ({ size = 24, className = '', style: xStyle, ...rest }) =>
   </svg>
 )
 
+export const PxBluetooth = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="7" y="1" width="2" height="14"/>
+    <rect x="11" y="1" width="2" height="2"/>
+    <rect x="9" y="3" width="2" height="2"/>
+    <rect x="5" y="5" width="2" height="2"/>
+    <rect x="9" y="7" width="4" height="2"/>
+    <rect x="5" y="9" width="2" height="2"/>
+    <rect x="9" y="11" width="2" height="2"/>
+    <rect x="11" y="13" width="2" height="2"/>
+  </svg>
+)
+
 export const PxRefresh = ({ size = 24, className = '', style: xStyle, ...rest }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
     <rect x="6" y="1" width="4" height="2"/>
