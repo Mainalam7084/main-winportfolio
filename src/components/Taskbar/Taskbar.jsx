@@ -10,14 +10,14 @@ import {
 const TASKBAR_H = 48  // px
 
 export default function Taskbar() {
-  const windows           = useStore(state => state.windows)
-  const activeWindowId    = useStore(state => state.activeWindowId)
+  const windows = useStore(state => state.windows)
+  const activeWindowId = useStore(state => state.activeWindowId)
   const toggleWindowConfig = useStore(state => state.toggleWindowConfig)
-  const isStartMenuOpen   = useStore(state => state.isStartMenuOpen)
-  const toggleStartMenu   = useStore(state => state.toggleStartMenu)
-  const closeStartMenu    = useStore(state => state.closeStartMenu)
-  const clearAllWindows   = useStore(state => state.clearAllWindows)
-  const openWindow        = useStore(state => state.openWindow)
+  const isStartMenuOpen = useStore(state => state.isStartMenuOpen)
+  const toggleStartMenu = useStore(state => state.toggleStartMenu)
+  const closeStartMenu = useStore(state => state.closeStartMenu)
+  const clearAllWindows = useStore(state => state.clearAllWindows)
+  const openWindow = useStore(state => state.openWindow)
 
   const [searchQuery, setSearchQuery] = useState('')
   const isSearching = searchQuery.trim().length > 0
@@ -163,13 +163,7 @@ export default function Taskbar() {
 
             {/* Footer / user */}
             <div style={{ borderTop: '2px solid #e5e5e5', padding: '10px 14px', background: '#fafafa', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: 32, height: 32, background: '#000', border: '2px solid #000',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--font-family-pixel)', fontSize: '14px', color: '#fff',
-              }}>
-                MW
-              </div>
+              <ProfileAvatar />
               <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#000' }}>MAIN_USER</span>
             </div>
           </motion.div>
@@ -283,6 +277,46 @@ function TaskBtn({ children, active, onClick, title, style = {} }) {
     >
       {children}
     </button>
+  )
+}
+
+function ProfileAvatar() {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      style={{ position: 'relative', width: 96, height: 54, flexShrink: 0, border: '2px solid #000' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <img
+        src="/image1.png"
+        alt="profile"
+        draggable={false}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'contain',
+          imageRendering: 'pixelated',
+          opacity: hovered ? 0 : 1,
+          transition: 'opacity 300ms',
+          pointerEvents: 'none', userSelect: 'none',
+        }}
+      />
+      <img
+        src="/image2.png"
+        alt="profile helmet"
+        draggable={false}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'contain',
+          imageRendering: 'pixelated',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 300ms',
+          pointerEvents: 'none', userSelect: 'none',
+        }}
+      />
+    </div>
   )
 }
 
