@@ -2,12 +2,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useStore } from '../../core/store'
 import { useFileSystem } from '../../core/fileSystemStore'
 import {
-  PxDocument, PxGlobe, PxGrid4, PxFolder,
+  PxDocument, PxGlobe, PxGrid4, PxFolder, PxUser, PxMail,
 } from '../ui/PixelIcons'
 
 const SYSTEM_SHORTCUTS = [
   { id: 'sc_projects',  name: 'Projects',  Icon: PxGrid4,  color: '#000', app: 'projects', path: null },
   { id: 'sc_chrome',    name: 'Chrome',    Icon: PxGlobe,  color: '#000', app: 'chrome',   path: null },
+  { id: 'sc_about',     name: 'About',     Icon: PxUser,   color: '#000', app: 'about',    path: null },
+  { id: 'sc_contact',   name: 'Contact',   Icon: PxMail,   color: '#000', app: 'contact',  path: null },
 ]
 
 const labelStyle = {

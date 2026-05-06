@@ -392,3 +392,28 @@ export const PxRefresh = ({ size = 24, className = '', style: xStyle, ...rest })
     <rect x="3" y="1" width="2" height="4"/>
   </svg>
 )
+
+export const PxUser = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="5" y="1" width="6" height="5"/>
+    <rect x="3" y="7" width="10" height="5"/>
+    <rect x="4" y="12" width="3" height="3"/>
+    <rect x="9" y="12" width="3" height="3"/>
+  </svg>
+)
+
+export const PxMail = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="1" y="3" width="14" height="1"/>
+    <rect x="1" y="13" width="14" height="1"/>
+    <rect x="1" y="4" width="1" height="9"/>
+    <rect x="14" y="4" width="1" height="9"/>
+    <rect x="1" y="4" width="4" height="1"/>
+    <rect x="11" y="4" width="4" height="1"/>
+    <rect x="4" y="5" width="3" height="1"/>
+    <rect x="9" y="5" width="3" height="1"/>
+    <rect x="6" y="6" width="2" height="1"/>
+    <rect x="8" y="6" width="2" height="1"/>
+    <rect x="7" y="7" width="2" height="1"/>
+  </svg>
+)
