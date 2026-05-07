@@ -2,12 +2,12 @@ import React from 'react'
 
 const px = { fontFamily: 'var(--font-family-pixel)' }
 
-const SKILLS = ['React', 'Node.js', 'TypeScript', 'Python', 'PostgreSQL', 'Docker', 'TailwindCSS', 'GraphQL']
+const SKILLS = ['JAVA', 'React', 'Laravel', 'JavaScript', 'PHP', 'HTML', 'CSS', 'MySQL', 'Docker', 'TailwindCSS', 'GitHub']
 
 const STATS = [
-  { label: 'YEARS EXP', value: '5+' },
-  { label: 'PROJECTS', value: '32' },
-  { label: 'COMMITS', value: '4.1K' },
+  { label: 'YEARS EXP', value: 'N/A' },
+  { label: 'PROJECTS', value: 'Enough' },
+  { label: 'COMMITS', value: 'Too Many' },
   { label: 'COFFEE', value: '∞' },
 ]
 
@@ -27,30 +27,30 @@ export default function About() {
         }}>
           {/* Pixel avatar (inline SVG) */}
           <svg viewBox="0 0 16 16" width="64" height="64" style={{ imageRendering: 'pixelated' }} fill="#000">
-            <rect x="4" y="1" width="8" height="7"/>
-            <rect x="2" y="8" width="12" height="6"/>
-            <rect x="3" y="14" width="4" height="2"/>
-            <rect x="9" y="14" width="4" height="2"/>
-            <rect x="5" y="3" width="2" height="1" fill="#facc15"/>
-            <rect x="9" y="3" width="2" height="1" fill="#facc15"/>
-            <rect x="5" y="6" width="6" height="1" fill="#facc15"/>
+            <rect x="4" y="1" width="8" height="7" />
+            <rect x="2" y="8" width="12" height="6" />
+            <rect x="3" y="14" width="4" height="2" />
+            <rect x="9" y="14" width="4" height="2" />
+            <rect x="5" y="3" width="2" height="1" fill="#facc15" />
+            <rect x="9" y="3" width="2" height="1" fill="#facc15" />
+            <rect x="5" y="6" width="6" height="1" fill="#facc15" />
           </svg>
         </div>
 
         {/* Name + role */}
         <div style={{ flex: 1, minWidth: '180px' }}>
           <div style={{ ...px, fontSize: '22px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '4px' }}>
-            ALEX MONROE
+            Main Alam
           </div>
           <div style={{
             ...px, fontSize: '12px', letterSpacing: '1px',
             background: '#000', color: '#facc15',
             display: 'inline-block', padding: '3px 10px', marginBottom: '8px',
           }}>
-            FULL STACK DEVELOPER
+            FULL STACK WEB DEVELOPER
           </div>
           <div style={{ ...px, fontSize: '12px', color: '#555', lineHeight: '1.6' }}>
-            📍 San Francisco, CA &nbsp;|&nbsp; 🌐 alexmonroe.dev
+            📍 Madrid, Spain |  🌐 <a href="mailto:mainalam.tr7@gmail.com">mainalam.tr7@gmail.com</a>
           </div>
         </div>
       </div>
@@ -64,10 +64,14 @@ export default function About() {
           // BIO
         </div>
         <p style={{ ...px, fontSize: '12px', color: '#333', lineHeight: '1.8', margin: 0 }}>
-          Passionate developer with 5+ years of experience building modern web applications.
-          I thrive at the intersection of design and engineering — crafting products that are
-          both beautiful and performant. When I'm not shipping code, I'm tinkering with pixel
-          art, retro game engines, or over-engineering my dev setup.
+          I am characterized by my calm demeanor,
+          patience, and constant curiosity that drives me to
+          keep learning. My experience living in Bangladesh
+          and Spain has given me a multicultural
+          perspective, a great capacity for adaptation, and
+          an open mind. I work comfortably both as part of
+          a team and independently, always with
+          responsibility and dedication.
         </p>
       </div>
 
@@ -92,7 +96,7 @@ export default function About() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {SKILLS.map((skill) => (
             <span key={skill} style={{
-              ...px, fontSize: '11px', letterSpacing: '1px',
+              ...px, fontSize: '11px', letterSpacing: '2px',
               padding: '4px 10px',
               border: '2px solid #000',
               background: 'transparent',
