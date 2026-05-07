@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth, PxRadio, PxPlay, PxPause, PxSkipBack, PxSkipForward } from '../ui/PixelIcons'
+import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth, PxRadio, PxPlay, PxPause, PxSkipBack, PxSkipForward, PxCloud, PxRefresh } from '../ui/PixelIcons'
 import { useRadioStore, MOCK_STATIONS } from '../../core/radioStore'
+import { useWeatherStore, getWMO } from '../../core/weatherStore'
 
 const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER']
 const DAYS   = ['SUN','MON','TUE','WED','THU','FRI','SAT']
@@ -10,17 +11,20 @@ export default function SystemTray() {
   const [time, setTime]             = useState(new Date())
   const [batteryLevel, setBattery]  = useState(100)
   const [isCharging, setIsCharging] = useState(false)
-  const [showIcons, setShowIcons]   = useState(false)
-  const [showPanel, setShowPanel]   = useState(false)
-  const [showRadio, setShowRadio]   = useState(false)
-  const [showClock, setShowClock]   = useState(false)
+  const [showIcons, setShowIcons]     = useState(false)
+  const [showPanel, setShowPanel]     = useState(false)
+  const [showRadio, setShowRadio]     = useState(false)
+  const [showWeather, setShowWeather] = useState(false)
+  const [showClock, setShowClock]     = useState(false)
   const [wifi, setWifi]             = useState(true)
   const [bluetooth, setBluetooth]   = useState(false)
   const [calDate, setCalDate]       = useState(new Date())
 
   const { isPlaying, isBuffering, currentStation, error, togglePlay, playNext, playPrev, setStation, initAudio } = useRadioStore()
+  const { data: wData, loading: wLoading, fetchWeather, refresh: wRefresh } = useWeatherStore()
 
   useEffect(() => { initAudio() }, [initAudio])
+  useEffect(() => { fetchWeather() }, [fetchWeather])
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
@@ -45,7 +49,7 @@ export default function SystemTray() {
   const SS = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
   const DD = time.toLocaleDateString()
 
-  const closeAll = () => { setShowPanel(false); setShowIcons(false); setShowRadio(false) }
+  const closeAll = () => { setShowPanel(false); setShowIcons(false); setShowRadio(false); setShowWeather(false) }
 
   const calYear    = calDate.getFullYear()
   const calMonth   = calDate.getMonth()
@@ -261,6 +265,98 @@ export default function SystemTray() {
                     </button>
                   ))}
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Weather ── */}
+        <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
+          <TrayBtn
+            onClick={() => { setShowWeather(v => !v); setShowPanel(false); setShowIcons(false); setShowRadio(false) }}
+            title="Weather"
+            active={showWeather}
+          >
+            <PxCloud size={16} style={{ color: wData ? '#000' : '#888' }} />
+            {wData && (
+              <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '12px', color: '#000' }}>
+                {wData.temp}°
+              </span>
+            )}
+          </TrayBtn>
+
+          <AnimatePresence>
+            {showWeather && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.08 }}
+                style={{
+                  position: 'absolute', bottom: 52, right: 0,
+                  width: 240,
+                  background: '#fff', border: '3px solid #000',
+                  boxShadow: '4px -4px 0 #000', zIndex: 60,
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ background: '#000', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <PxCloud size={14} style={{ color: '#facc15', flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#fff', letterSpacing: '1px', flex: 1 }}>
+                    WEATHER
+                  </span>
+                  <button
+                    onClick={wRefresh}
+                    disabled={wLoading}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', outline: 'none', opacity: wLoading ? 0.4 : 1, transition: 'none' }}
+                    title="Refresh"
+                  >
+                    <PxRefresh size={12} style={{ color: '#facc15' }} />
+                  </button>
+                </div>
+
+                {wLoading && !wData && (
+                  <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#888', letterSpacing: '1px' }}>
+                    FETCHING...
+                  </div>
+                )}
+
+                {!wLoading && !wData && (
+                  <div style={{ padding: '16px 14px', textAlign: 'center', fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#888', letterSpacing: '1px', lineHeight: 1.6 }}>
+                    NO DATA<br/>CHECK LOCATION ACCESS
+                  </div>
+                )}
+
+                {wData && (
+                  <>
+                    <div style={{ padding: '12px 14px', borderBottom: '2px solid #e5e5e5' }}>
+                      <div style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '10px', color: '#777', letterSpacing: '1px', marginBottom: '6px' }}>
+                        📍 {wData.location}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '36px', color: '#000', lineHeight: 1 }}>
+                          {wData.temp}°<span style={{ fontSize: '18px', color: '#777' }}>C</span>
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '11px', color: '#000', letterSpacing: '1px' }}>
+                            {getWMO(wData.weatherCode).desc}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ padding: '8px 14px', display: 'flex', gap: '8px' }}>
+                      <div style={{ flex: 1, fontFamily: 'var(--font-family-pixel)', fontSize: '10px', color: '#555', letterSpacing: '0.5px' }}>
+                        <div style={{ color: '#888', marginBottom: '2px' }}>HUMIDITY</div>
+                        <div style={{ color: '#000', fontSize: '13px' }}>{wData.humidity}%</div>
+                      </div>
+                      <div style={{ width: '1px', background: '#e5e5e5' }} />
+                      <div style={{ flex: 1, fontFamily: 'var(--font-family-pixel)', fontSize: '10px', color: '#555', letterSpacing: '0.5px' }}>
+                        <div style={{ color: '#888', marginBottom: '2px' }}>WIND</div>
+                        <div style={{ color: '#000', fontSize: '13px' }}>{wData.windSpeed} km/h</div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
