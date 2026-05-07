@@ -2,14 +2,17 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useStore } from '../../core/store'
 import { useFileSystem } from '../../core/fileSystemStore'
 import {
-  PxDocument, PxGlobe, PxGrid4, PxFolder, PxUser, PxMail,
+  PxDocument, PxGlobe, PxGrid4, PxFolder, PxUser, PxMail, PxGamepad, PxCalculator, PxCloud,
 } from '../ui/PixelIcons'
 
 const SYSTEM_SHORTCUTS = [
-  { id: 'sc_projects', name: 'Projects', Icon: PxGrid4, color: '#000', app: 'projects', path: null },
-  { id: 'sc_chrome',   name: 'Chrome',   Icon: PxGlobe, color: '#000', app: 'chrome',   path: null },
-  { id: 'sc_about',    name: 'About',    Icon: PxUser,  color: '#000', app: 'about',    path: null },
-  { id: 'sc_contact',  name: 'Contact',  Icon: PxMail,  color: '#000', app: 'contact',  path: null },
+  { id: 'sc_projects',   name: 'Projects',   Icon: PxGrid4,      color: '#000', app: 'projects',   path: null },
+  { id: 'sc_chrome',     name: 'Chrome',     Icon: PxGlobe,      color: '#000', app: 'chrome',     path: null },
+  { id: 'sc_about',      name: 'About',      Icon: PxUser,       color: '#000', app: 'about',      path: null },
+  { id: 'sc_contact',    name: 'Contact',    Icon: PxMail,       color: '#000', app: 'contact',    path: null },
+  { id: 'sc_games',      name: 'Games',      Icon: PxGamepad,    color: '#000', app: 'games',      path: null },
+  { id: 'sc_calculator', name: 'Calculator', Icon: PxCalculator, color: '#000', app: 'calculator', path: null },
+  { id: 'sc_weather',    name: 'Weather',    Icon: PxCloud,      color: '#000', app: 'weather',    path: null },
 ]
 
 const labelStyle = {
