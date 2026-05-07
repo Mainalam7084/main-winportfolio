@@ -21,7 +21,7 @@ function calc(a, b, op) {
     case '-': return a - b
     case '×': return a * b
     case '÷': return b !== 0 ? a / b : Infinity
-    default:   return b
+    default: return b
   }
 }
 
@@ -94,9 +94,9 @@ export default function Calculator() {
 
   useEffect(() => {
     const map = {
-      '0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',
-      '.':'.', 'Backspace':'⌫', 'Escape':'C', 'Delete':'C',
-      'Enter':'=', '=':'=', '+':'+', '-':'-', '*':'×', '/':'÷', '%':'%',
+      '0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+      '.': '.', 'Backspace': '⌫', 'Escape': 'C', 'Delete': 'C',
+      'Enter': '=', '=': '=', '+': '+', '-': '-', '*': '×', '/': '÷', '%': '%',
     }
     const onKey = (e) => {
       const k = map[e.key]
@@ -111,7 +111,7 @@ export default function Calculator() {
       {/* Header */}
       <div style={{ background: '#000', borderBottom: '3px solid #000', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <PxCalculator size={16} style={{ color: '#facc15' }} />
-        <span style={{ color: '#fff', fontSize: '20px', letterSpacing: '2px' }}>CALC_</span>
+        <span style={{ color: '#fff', fontSize: '20px', letterSpacing: '2px' }}>Main's Calculator</span>
       </div>
 
       {/* Display */}
@@ -129,14 +129,14 @@ export default function Calculator() {
         {ROWS.map((row, ri) => (
           <div key={ri} style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
             {row.map(btn => {
-              const isOp    = OPS.includes(btn)
-              const isEq    = btn === '='
+              const isOp = OPS.includes(btn)
+              const isEq = btn === '='
               const isActive = btn === op
               const isClear = btn === 'C'
 
               let bg = '#f5f5f5', fg = '#000', shadow = '3px 3px 0 #000'
-              if (isEq)     { bg = '#facc15'; fg = '#000'; shadow = '3px 3px 0 #000' }
-              else if (isOp) { bg = '#000';   fg = '#facc15' }
+              if (isEq) { bg = '#facc15'; fg = '#000'; shadow = '3px 3px 0 #000' }
+              else if (isOp) { bg = '#000'; fg = '#facc15' }
               else if (isClear) { bg = '#e5e5e5'; fg = '#000' }
               if (isActive && !isEq) { bg = '#facc15'; fg = '#000' }
 
