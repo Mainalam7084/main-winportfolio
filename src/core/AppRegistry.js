@@ -1,12 +1,17 @@
-import { PxFolder, PxGlobe, PxRadio, PxGrid4, PxUser, PxMail, PxCamera } from '../components/ui/PixelIcons'
+import { PxFolder, PxGlobe, PxRadio, PxGrid4, PxUser, PxMail, PxCamera, PxGamepad, PxCalculator, PxCloud } from '../components/ui/PixelIcons'
 
-import Explorer   from '../apps/Explorer/Explorer'
-import ChromeApp  from '../apps/Chrome/Chrome'
-import RadioApp   from '../apps/Radio/Radio'
-import Projects   from '../apps/Projects/Projects'
-import About      from '../apps/About/About'
-import Contact    from '../apps/Contact/Contact'
-import Gallery    from '../apps/Gallery/Gallery'
+import Explorer    from '../apps/Explorer/Explorer'
+import ChromeApp   from '../apps/Chrome/Chrome'
+import RadioApp    from '../apps/Radio/Radio'
+import Projects    from '../apps/Projects/Projects'
+import About       from '../apps/About/About'
+import Contact     from '../apps/Contact/Contact'
+import Gallery     from '../apps/Gallery/Gallery'
+import Games       from '../apps/Games/Games'
+import Snake       from '../apps/Games/Snake/Snake'
+import FloppyBird  from '../apps/Games/FloppyBird/FloppyBird'
+import Calculator  from '../apps/Calculator/Calculator'
+import Weather     from '../apps/Weather/Weather'
 
 export const AppRegistry = {
   explorer: {
@@ -64,5 +69,45 @@ export const AppRegistry = {
     component: Gallery,
     defaultSize: { width: 860, height: 600 },
     defaultPosition: { x: 120, y: 70 },
+  },
+  games: {
+    id: 'games',
+    title: 'Games',
+    icon: PxGamepad,
+    component: Games,
+    defaultSize: { width: 640, height: 440 },
+    defaultPosition: { x: 140, y: 80 },
+  },
+  snake: {
+    id: 'snake',
+    title: 'Snake',
+    icon: PxGamepad,
+    component: Snake,
+    defaultSize: { width: 480, height: 560 },
+    defaultPosition: { x: 180, y: 60 },
+  },
+  floppybird: {
+    id: 'floppybird',
+    title: 'Floppy Bird',
+    icon: PxGamepad,
+    component: FloppyBird,
+    defaultSize: { width: 460, height: 640 },
+    defaultPosition: { x: 200, y: 40 },
+  },
+  calculator: {
+    id: 'calculator',
+    title: 'Calculator',
+    icon: PxCalculator,
+    component: Calculator,
+    defaultSize: { width: 360, height: 560 },
+    defaultPosition: { x: 240, y: 80 },
+  },
+  weather: {
+    id: 'weather',
+    title: 'Weather',
+    icon: PxCloud,
+    component: Weather,
+    defaultSize: { width: 400, height: 520 },
+    defaultPosition: { x: 220, y: 80 },
   },
 }
