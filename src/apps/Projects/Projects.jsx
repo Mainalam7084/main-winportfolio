@@ -4,47 +4,42 @@ import { PxGrid4, PxGlobe, PxDocument } from '../../components/ui/PixelIcons'
 const PROJECTS = [
   {
     id: 1,
-    name: 'Web OS Portfolio',
-    tech: ['React', 'Vite', 'TailwindCSS', 'Zustand'],
-    desc: 'This very OS you\'re using. Draggable windows, pixel brutalism, simulated filesystem.',
+    name: 'Main Reviews',
+    tech: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL', 'TailwindCSS', 'Framer Motion', 'NextAuth', 'GitHub', 'Vercel'],
+    desc: 'A modern movie review application built with Next.js, featuring dual-mode operation for both local and cloud-based review management.',
     status: 'LIVE',
-    type: 'app',
+    type: 'Web',
+    url: 'https://main-reviews.vercel.app',
   },
   {
     id: 2,
-    name: 'Project Alpha',
-    tech: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'],
-    desc: 'Full-stack web application with server-side rendering and type-safe database ORM.',
-    status: 'WIP',
-    type: 'web',
+    name: 'Main Win Portfolio',
+    tech: ['React', 'TailwindCSS', 'Framer Motion', 'Zustand', 'Vite', 'GitHub', 'Vercel'],
+    desc: 'A modern portfolio website built with Next.js, This very OS you\'re using. Draggable windows, pixel brutalism, simulated filesystem.',
+    status: 'LIVE',
+    type: 'Web',
+    url: 'https://main-winportfolio.vercel.app',
   },
   {
     id: 3,
-    name: 'Pixel Engine',
-    tech: ['Canvas API', 'JavaScript', 'WebGL'],
-    desc: 'Retro game engine built in pure JS. Sprite rendering, tilemap, input handling.',
-    status: 'DONE',
-    type: 'tool',
-  },
-  {
-    id: 4,
-    name: 'CLI Toolkit',
-    tech: ['Node.js', 'Commander.js', 'Ink'],
-    desc: 'Developer CLI utilities. File scaffolding, git helpers, project templates.',
-    status: 'WIP',
-    type: 'tool',
+    name: 'SteamWish',
+    tech: ['Laravel', 'MySql', 'Blade', 'JS', 'TailwindCSS', 'GitHub', 'Render'],
+    desc: 'A modern game store built with Laravel, featuring a sleek interface and robust backend. Explore trending titles, manage your library, and discover game price, descounts, favorite games, etc.',
+    status: 'LIVE',
+    type: 'Web',
+    url: 'https://steamwish.onrender.com',
   },
 ]
 
 const STATUS_COLORS = {
   LIVE: { bg: '#000', fg: '#fff' },
-  WIP:  { bg: '#facc15', fg: '#000' },
+  WIP: { bg: '#facc15', fg: '#000' },
   DONE: { bg: '#fff', fg: '#000', border: '2px solid #000' },
 }
 
 const TYPE_ICONS = {
-  app:  PxGrid4,
-  web:  PxGlobe,
+  app: PxGrid4,
+  web: PxGlobe,
   tool: PxDocument,
 }
 
@@ -78,12 +73,13 @@ export default function Projects() {
               key={proj.id}
               onMouseEnter={() => setHovered(proj.id)}
               onMouseLeave={() => setHovered(null)}
+              onClick={() => proj.url && window.open(proj.url, '_blank', 'noopener,noreferrer')}
               style={{
                 border: '2px solid #000',
                 background: isHovered ? '#facc15' : '#fff',
                 boxShadow: isHovered ? '6px 6px 0px #000' : '4px 4px 0px #000',
                 padding: '20px',
-                cursor: 'pointer',
+                cursor: proj.url ? 'pointer' : 'default',
                 color: '#000',
                 transition: 'box-shadow 0.05s, background 0.05s',
               }}
@@ -95,6 +91,9 @@ export default function Projects() {
                   <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '15px' }}>
                     {proj.name}
                   </span>
+                  {isHovered && proj.url && (
+                    <span style={{ fontSize: '10px', opacity: 0.7 }}>↗</span>
+                  )}
                 </div>
                 <span style={{
                   background: sc.bg,
