@@ -427,3 +427,44 @@ export const PxMail = ({ size = 24, className = '', style: xStyle, ...rest }) =>
     <rect x="7" y="7" width="2" height="1"/>
   </svg>
 )
+
+export const PxGamepad = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="1" y="4" width="14" height="7"/>
+    <rect x="1" y="9" width="5" height="5"/>
+    <rect x="10" y="9" width="5" height="5"/>
+    <rect x="4" y="5" width="2" height="5" fill="#fff"/>
+    <rect x="3" y="7" width="4" height="1" fill="#fff"/>
+    <rect x="10" y="5" width="2" height="2" fill="#fff"/>
+    <rect x="13" y="5" width="2" height="2" fill="#fff"/>
+    <rect x="10" y="8" width="2" height="2" fill="#fff"/>
+    <rect x="11" y="6" width="2" height="2" fill="#fff"/>
+  </svg>
+)
+
+export const PxCalculator = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="2" y="1" width="12" height="14"/>
+    <rect x="3" y="2" width="10" height="4" fill="#fff"/>
+    <rect x="3" y="7" width="2" height="2" fill="#fff"/>
+    <rect x="7" y="7" width="2" height="2" fill="#fff"/>
+    <rect x="11" y="7" width="2" height="2" fill="#fff"/>
+    <rect x="3" y="10" width="2" height="2" fill="#fff"/>
+    <rect x="7" y="10" width="2" height="2" fill="#fff"/>
+    <rect x="11" y="10" width="2" height="2" fill="#fff"/>
+    <rect x="3" y="13" width="2" height="2" fill="#fff"/>
+    <rect x="7" y="13" width="2" height="2" fill="#fff"/>
+    <rect x="11" y="13" width="2" height="2" fill="#fff"/>
+  </svg>
+)
+
+export const PxCloud = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="5" y="3" width="5" height="2"/>
+    <rect x="3" y="5" width="9" height="1"/>
+    <rect x="2" y="6" width="12" height="4"/>
+    <rect x="3" y="10" width="10" height="1"/>
+    <rect x="8" y="2" width="4" height="2"/>
+    <rect x="11" y="4" width="3" height="3"/>
+  </svg>
+)
