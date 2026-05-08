@@ -25,16 +25,7 @@ export default function About() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative',
         }}>
-          {/* Pixel avatar (inline SVG) */}
-          <svg viewBox="0 0 16 16" width="64" height="64" style={{ imageRendering: 'pixelated' }} fill="#000">
-            <rect x="4" y="1" width="8" height="7" />
-            <rect x="2" y="8" width="12" height="6" />
-            <rect x="3" y="14" width="4" height="2" />
-            <rect x="9" y="14" width="4" height="2" />
-            <rect x="5" y="3" width="2" height="1" fill="#facc15" />
-            <rect x="9" y="3" width="2" height="1" fill="#facc15" />
-            <rect x="5" y="6" width="6" height="1" fill="#facc15" />
-          </svg>
+          <img src="public/main.png" alt="Main" className="w-full h-full object-cover" />
         </div>
 
         {/* Name + role */}
