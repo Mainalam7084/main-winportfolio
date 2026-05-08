@@ -6,13 +6,13 @@ import {
 } from '../ui/PixelIcons'
 
 const SYSTEM_SHORTCUTS = [
-  { id: 'sc_projects',   name: 'Projects',   Icon: PxGrid4,      color: '#000', app: 'projects',   path: null },
-  { id: 'sc_chrome',     name: 'Chrome',     Icon: PxGlobe,      color: '#000', app: 'chrome',     path: null },
-  { id: 'sc_about',      name: 'About',      Icon: PxUser,       color: '#000', app: 'about',      path: null },
-  { id: 'sc_contact',    name: 'Contact',    Icon: PxMail,       color: '#000', app: 'contact',    path: null },
-  { id: 'sc_games',      name: 'Games',      Icon: PxGamepad,    color: '#000', app: 'games',      path: null },
+  { id: 'sc_projects', name: 'Projects', Icon: PxGrid4, color: '#000', app: 'projects', path: null },
+  { id: 'sc_chrome', name: 'Chrome', Icon: PxGlobe, color: '#000', app: 'chrome', path: null },
+  { id: 'sc_about', name: 'About', Icon: PxUser, color: '#000', app: 'about', path: null },
+  { id: 'sc_contact', name: 'Contact', Icon: PxMail, color: '#000', app: 'contact', path: null },
+  { id: 'sc_games', name: 'Games', Icon: PxGamepad, color: '#000', app: 'games', path: null },
   { id: 'sc_calculator', name: 'Calculator', Icon: PxCalculator, color: '#000', app: 'calculator', path: null },
-  { id: 'sc_weather',    name: 'Weather',    Icon: PxCloud,      color: '#000', app: 'weather',    path: null },
+  { id: 'sc_weather', name: 'Weather', Icon: PxCloud, color: '#000', app: 'weather', path: null },
 ]
 
 const labelStyle = {
@@ -60,6 +60,7 @@ export default function Desktop() {
   const { openWindow, closeStartMenu } = useStore()
   const { fs } = useFileSystem()
   const [selected, setSelected] = useState(null)
+  const [showHint, setShowHint] = useState(true)
 
   // ── Wallpaper glitch ──
   const [wallpaper, setWallpaper] = useState('normal')
@@ -78,8 +79,8 @@ export default function Desktop() {
     const tick = (now) => {
       const elapsed = now - start
       if (elapsed < duration) {
-        const x   = (Math.random() - 0.5) * 30
-        const y   = (Math.random() - 0.5) * 12
+        const x = (Math.random() - 0.5) * 30
+        const y = (Math.random() - 0.5) * 12
         const skw = (Math.random() - 0.5) * 5
         const show = Math.random() > 0.45
         if (helmetLayerRef.current) {
@@ -100,7 +101,7 @@ export default function Desktop() {
     rafRef.current = requestAnimationFrame(tick)
   }, [])
 
-  const onTriggerEnter = useCallback(() => runGlitch(true),  [runGlitch])
+  const onTriggerEnter = useCallback(() => { runGlitch(true); setShowHint(false) }, [runGlitch])
   const onTriggerLeave = useCallback(() => runGlitch(false), [runGlitch])
 
   const handleSingleClick = useCallback((id) => {
@@ -129,6 +130,18 @@ export default function Desktop() {
           67%  { clip-path: inset(85% 0 4%  0); }
           81%  { clip-path: inset(20% 0 68% 0); }
           100% { clip-path: inset(0   0 0   0); }
+        }
+        @keyframes float-hint {
+          0%, 100% { transform: translateY(0px); }
+          50%      { transform: translateY(-6px); }
+        }
+        @keyframes glitch-hint {
+          0%, 75%, 100% { transform: translate(0,0); fill: #000; }
+          77%  { transform: translate(-3px, 0); fill: #e11d48; }
+          79%  { transform: translate(3px, 0);  fill: #1d4ed8; }
+          81%  { transform: translate(-1px, 1px); fill: #000; }
+          83%  { transform: translate(1px, -1px); fill: #e11d48; }
+          85%  { transform: translate(0,0); fill: #000; }
         }
       `}</style>
 
@@ -176,20 +189,77 @@ export default function Desktop() {
         }}
       >
         {/* System shortcuts */}
-        {SYSTEM_SHORTCUTS.map((s) => (
-          <DesktopIcon
-            key={s.id}
-            id={s.id}
-            name={s.name}
-            Icon={s.Icon}
-            color={s.color}
-            selected={selected}
-            onSingleClick={handleSingleClick}
-            onDoubleClick={() => openApp(s.app, s.name, s.path ? { initialPath: s.path } : {})}
-            onGlitchEnter={s.id === 'sc_projects' ? onTriggerEnter : undefined}
-            onGlitchLeave={s.id === 'sc_projects' ? onTriggerLeave : undefined}
-          />
-        ))}
+        {SYSTEM_SHORTCUTS.map((s) => {
+          const isProjects = s.id === 'sc_projects'
+          const icon = (
+            <DesktopIcon
+              id={s.id}
+              name={s.name}
+              Icon={s.Icon}
+              color={s.color}
+              selected={selected}
+              onSingleClick={handleSingleClick}
+              onDoubleClick={() => openApp(s.app, s.name, s.path ? { initialPath: s.path } : {})}
+              onGlitchEnter={isProjects ? onTriggerEnter : undefined}
+              onGlitchLeave={isProjects ? onTriggerLeave : undefined}
+            />
+          )
+          if (!isProjects) return <div key={s.id}>{icon}</div>
+          return (
+            <div key={s.id} style={{ position: 'relative' }}>
+              {showHint && (
+                <div style={{
+                  position: 'absolute',
+                  left: '80%',
+                  top: '10%',
+                  transform: 'translateY(-50%)',
+                  marginLeft: '2px',
+                  pointerEvents: 'none',
+                  zIndex: 20,
+                  animation: 'float-hint 2.2s ease-in-out infinite',
+                }}>
+                  {/*
+                    Pixel-art speech-bubble cloud.
+                    Path breakdown (8 px grid):
+                      - tail tip at (0,36) points left toward the icon
+                      - 3 blocky bumps across the top
+                      - flat rectangular base holds the text
+                      - black shadow layer offset (+3,+3) for neo-brutalist depth
+                  */}
+                  <svg width="170" height="70" viewBox="0 0 170 70" style={{ display: 'block', overflow: 'visible' }}>
+                    {/* shadow */}
+                    <path
+                      d="M 3,39 L 19,31 L 19,27 L 39,27 L 39,15 L 47,15 L 47,3 L 63,3 L 63,15 L 71,15 L 71,3 L 107,3 L 107,15 L 115,15 L 115,3 L 127,3 L 127,15 L 135,15 L 135,27 L 163,27 L 163,63 L 19,63 L 19,47 Z"
+                      fill="#000"
+                    />
+                    {/* cloud body */}
+                    <path
+                      d="M 0,36 L 16,28 L 16,24 L 36,24 L 36,12 L 44,12 L 44,0 L 60,0 L 60,12 L 68,12 L 68,0 L 104,0 L 104,12 L 112,12 L 112,0 L 124,0 L 124,12 L 132,12 L 132,24 L 160,24 L 160,60 L 16,60 L 16,44 Z"
+                      fill="#ffffff"
+                      stroke="#000"
+                      strokeWidth="2"
+                      strokeLinejoin="miter"
+                    />
+                    {/* text */}
+                    <text
+                      x="88"
+                      y="42"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontFamily="var(--font-family-pixel)"
+                      fontSize="11"
+                      fill="#000"
+                      style={{ animation: 'glitch-hint 3.5s linear infinite', transformBox: 'fill-box', transformOrigin: 'center' }}
+                    >
+                      hover over me!
+                    </text>
+                  </svg>
+                </div>
+              )}
+              {icon}
+            </div>
+          )
+        })}
 
         {/* User files on desktop (from filesystem store) */}
         {fs.desktop.map((item) => (
