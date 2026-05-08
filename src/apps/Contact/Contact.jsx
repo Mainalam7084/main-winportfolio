@@ -1,4 +1,9 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
+import emailjs from '@emailjs/browser'
+
+const SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID
+const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+const PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
 
 const px = { fontFamily: 'var(--font-family-pixel)' }
 
@@ -15,14 +20,26 @@ const inputStyle = {
 }
 
 export default function Contact() {
+  const formRef = useRef(null)
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSent(true)
+    setSending(true)
+    setError(null)
+    try {
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, { publicKey: PUBLIC_KEY })
+      setSent(true)
+    } catch (err) {
+      setError('Failed to send message. Please try again.')
+    } finally {
+      setSending(false)
+    }
   }
 
   if (sent) {
@@ -80,7 +97,7 @@ export default function Contact() {
 
       <div style={{ borderTop: '3px solid #000', marginBottom: '20px' }} />
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
         {/* Name + Email row */}
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -155,23 +172,34 @@ export default function Contact() {
         </div>
 
         {/* Submit */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ ...px, fontSize: '10px', color: '#aaa' }}>
-            * required fields
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {error && (
+            <div style={{ ...px, fontSize: '11px', color: '#dc2626', border: '2px solid #dc2626', padding: '6px 10px' }}>
+              {error}
+            </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ ...px, fontSize: '10px', color: '#aaa' }}>
+              * required fields
+            </div>
+            <button
+              type="submit"
+              disabled={sending}
+              style={{
+                ...px, fontSize: '13px', letterSpacing: '2px',
+                padding: '10px 28px',
+                border: '3px solid #000',
+                background: sending ? '#555' : '#000',
+                color: sending ? '#aaa' : '#facc15',
+                cursor: sending ? 'not-allowed' : 'pointer',
+                transition: 'none',
+              }}
+              onMouseEnter={(e) => { if (!sending) { e.currentTarget.style.background = '#facc15'; e.currentTarget.style.color = '#000' } }}
+              onMouseLeave={(e) => { if (!sending) { e.currentTarget.style.background = '#000'; e.currentTarget.style.color = '#facc15' } }}
+            >
+              {sending ? 'SENDING...' : 'SEND MESSAGE'}
+            </button>
           </div>
-          <button
-            type="submit"
-            style={{
-              ...px, fontSize: '13px', letterSpacing: '2px',
-              padding: '10px 28px',
-              border: '3px solid #000', background: '#000', color: '#facc15',
-              cursor: 'pointer', transition: 'none',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#facc15'; e.currentTarget.style.color = '#000' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#000'; e.currentTarget.style.color = '#facc15' }}
-          >
-            SEND MESSAGE
-          </button>
         </div>
 
       </form>
