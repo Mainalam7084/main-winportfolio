@@ -6,12 +6,12 @@ const GROUND_H = 24
 const BIRD_X = 80
 const BIRD_W = 28
 const BIRD_H = 22
-const GRAVITY = 0.38
-const JUMP_VEL = -7.5
+const GRAVITY = 0.26
+const JUMP_VEL = -6.0
 const PIPE_W = 50
-const PIPE_GAP = 128
-const PIPE_SPEED = 2.4
-const PIPE_INTERVAL = 95
+const PIPE_GAP = 152
+const PIPE_SPEED = 1.3
+const PIPE_INTERVAL = 125
 
 function initState() {
   return {
@@ -210,11 +210,14 @@ export default function FloppyBird() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.code === 'Space') { e.preventDefault(); if (phase === 'playing') flap() }
+      if (e.code !== 'Space') return
+      e.preventDefault()
+      if (phase === 'playing') flap()
+      else start()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, flap])
+  }, [phase, flap, start])
 
   const handleCanvasClick = useCallback(() => {
     if (phase === 'playing') flap()
@@ -244,32 +247,35 @@ export default function FloppyBird() {
             }}>
               {phase === 'dead' ? (
                 <>
-                  <div style={{ color: '#facc15', fontSize: '32px', letterSpacing: '4px' }}>GAME OVER</div>
+                  <div style={{ color: '#e11d48', fontSize: '32px', letterSpacing: '4px' }}>GAME OVER</div>
                   <div style={{ color: '#fff', fontSize: '22px' }}>SCORE: {score}</div>
                 </>
               ) : (
                 <>
                   <div style={{ color: '#facc15', fontSize: '32px', letterSpacing: '3px' }}>FLOPPY BIRD</div>
                   <div style={{ color: '#aaa', fontSize: '13px', textAlign: 'center', lineHeight: 2.2 }}>
-                    CLICK  /  SPACEBAR  TO  FLAP
+                    SPACE  TO  FLAP  &amp;  AVOID  PIPES
                   </div>
                 </>
               )}
-              <button
-                onClick={start}
-                style={{ background: '#facc15', border: '4px solid #fff', padding: '10px 36px', fontSize: '20px', ...px, cursor: 'pointer', boxShadow: '4px 4px 0 #fff', letterSpacing: '2px', outline: 'none', transition: 'none' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '6px 6px 0 #fff'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '4px 4px 0 #fff'}
-              >
-                {phase === 'dead' ? 'RESTART' : 'START'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <div style={{ color: '#facc15', fontSize: '20px', letterSpacing: '4px', border: '3px solid #facc15', padding: '10px 32px', boxShadow: '4px 4px 0 #facc15' }}>
+                  PRESS  SPACE
+                </div>
+                <button
+                  onClick={start}
+                  style={{ background: 'transparent', border: 'none', color: '#555', fontSize: '11px', ...px, cursor: 'pointer', letterSpacing: '2px', outline: 'none', padding: '4px' }}
+                >
+                  {phase === 'dead' ? 'or click to restart' : 'or click to start'}
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
       <div style={{ background: '#000', borderTop: '2px solid #333', padding: '4px 16px', display: 'flex', gap: '24px' }}>
-        <span style={{ color: '#555', fontSize: '11px', letterSpacing: '1px' }}>CLICK/SPACE: FLAP</span>
+        <span style={{ color: '#555', fontSize: '11px', letterSpacing: '1px' }}>SPACE: START / FLAP</span>
         <span style={{ color: '#555', fontSize: '11px', letterSpacing: '1px' }}>AVOID PIPES</span>
       </div>
     </div>
