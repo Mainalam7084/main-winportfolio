@@ -439,16 +439,7 @@ export default function SystemTray() {
                 {/* Calendar grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '2px 10px 12px', gap: 2 }}>
                   {cells.map((d, i) => (
-                    <div key={i} style={{
-                      textAlign: 'center',
-                      fontFamily: 'var(--font-family-pixel)', fontSize: '10px',
-                      padding: '3px 0', lineHeight: 1,
-                      background: d && isToday(d) ? '#facc15' : 'transparent',
-                      border: d && isToday(d) ? '2px solid #000' : '2px solid transparent',
-                      color: '#000',
-                    }}>
-                      {d ?? ''}
-                    </div>
+                    <CalDay key={i} day={d} today={d && isToday(d)} />
                   ))}
                 </div>
               </motion.div>
@@ -489,14 +480,25 @@ function RadioBtn({ onClick, children, primary }) {
 }
 
 function NavBtn({ onClick, children }) {
+  const [hov, setHov] = useState(false)
+  const [pressed, setPressed] = useState(false)
   return (
     <button
       onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => { setHov(false); setPressed(false) }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
       style={{
-        background: 'none', border: 'none', cursor: 'pointer',
+        background: hov ? '#facc15' : 'transparent',
+        border: `2px solid ${hov ? '#000' : 'transparent'}`,
+        boxShadow: pressed ? 'none' : hov ? '2px 2px 0 #000' : 'none',
+        transform: pressed ? 'translate(2px, 2px)' : 'none',
+        cursor: 'pointer',
         fontFamily: 'var(--font-family-pixel)', fontSize: '12px',
-        color: '#000', padding: '2px 6px',
-        lineHeight: 1,
+        color: '#000', padding: '3px 8px',
+        lineHeight: 1, outline: 'none',
+        transition: 'none',
       }}
     >
       {children}
@@ -528,6 +530,32 @@ function ToggleTile({ icon, label, sub, active, onClick }) {
         {sub}
       </span>
     </button>
+  )
+}
+
+function CalDay({ day, today }) {
+  const [hov, setHov] = useState(false)
+  const [pressed, setPressed] = useState(false)
+  if (!day) return <div />
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => { setHov(false); setPressed(false) }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      style={{
+        textAlign: 'center',
+        fontFamily: 'var(--font-family-pixel)', fontSize: '10px',
+        padding: '3px 0', lineHeight: 1, cursor: 'default',
+        background: today ? '#facc15' : hov ? 'rgba(250,204,21,0.35)' : 'transparent',
+        border: today || hov ? '2px solid #000' : '2px solid transparent',
+        boxShadow: pressed && !today ? 'inset 1px 1px 0 #000' : today ? '2px 2px 0 #000' : 'none',
+        transform: pressed && !today ? 'translate(1px,1px)' : 'none',
+        color: '#000',
+      }}
+    >
+      {day}
+    </div>
   )
 }
 
