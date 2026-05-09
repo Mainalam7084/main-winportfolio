@@ -3,27 +3,131 @@ import { motion, useDragControls } from 'framer-motion'
 import { ResizableBox } from 'react-resizable'
 import { useStore } from '../../core/store'
 import { PxClose, PxMinus, PxMaximize } from '../ui/PixelIcons'
+import { useMobile, MOBILE_DOCK_H } from '../../hooks/useMobile'
 import 'react-resizable/css/styles.css'
 
 export default function Window({ windowData, appConfig, children }) {
   const { id, title, position, size, minimized, maximized, zIndex } = windowData
 
-  const closeWindow    = useStore(state => state.closeWindow)
-  const minimizeWindow = useStore(state => state.minimizeWindow)
-  const maximizeWindow = useStore(state => state.maximizeWindow)
-  const focusWindow    = useStore(state => state.focusWindow)
+  const closeWindow         = useStore(state => state.closeWindow)
+  const minimizeWindow      = useStore(state => state.minimizeWindow)
+  const maximizeWindow      = useStore(state => state.maximizeWindow)
+  const focusWindow         = useStore(state => state.focusWindow)
   const updateWindowPosition = useStore(state => state.updateWindowPosition)
   const updateWindowSize     = useStore(state => state.updateWindowSize)
-  const activeWindowId = useStore(state => state.activeWindowId)
-  const setShieldActive = useStore(state => state.setShieldActive)
+  const activeWindowId       = useStore(state => state.activeWindowId)
+  const setShieldActive      = useStore(state => state.setShieldActive)
 
   const dragControls = useDragControls()
   const [isInteracting, setIsInteracting] = useState(false)
   const currentPos = useRef({ x: position.x, y: position.y })
 
+  const { isMobile, isTablet } = useMobile()
+
   if (minimized) return null
   const isActive = activeWindowId === id
 
+  // ── MOBILE FULLSCREEN SHEET ──────────────────────────────────────
+  if (isMobile) {
+    return (
+      <motion.div
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.55 }}
+        onDragEnd={(_, info) => {
+          if (info.offset.y > 90 || info.velocity.y > 500) minimizeWindow(id)
+        }}
+        initial={{ y: '100vh', opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: '100vh', opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+        onPointerDownCapture={() => !isActive && focusWindow(id)}
+        style={{
+          position: 'fixed',
+          left: 0, right: 0, top: 0,
+          bottom: MOBILE_DOCK_H,
+          zIndex,
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#fff',
+          border: '3px solid #000',
+          boxShadow: '0 -4px 0 #000',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Title bar — drag zone */}
+        <div
+          style={{
+            display: 'flex', alignItems: 'center',
+            height: 48, flexShrink: 0,
+            background: isActive ? '#000' : '#333',
+            borderBottom: '3px solid #000',
+            userSelect: 'none',
+            cursor: 'grab',
+            touchAction: 'none',
+            position: 'relative',
+          }}
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          {/* Pill handle */}
+          <div style={{
+            position: 'absolute', top: 7, left: '50%',
+            transform: 'translateX(-50%)',
+            width: 36, height: 3,
+            background: 'rgba(255,255,255,0.35)',
+            borderRadius: 2,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Close */}
+          <button
+            style={mobileBtnStyle(isActive ? '#000' : '#333', '#fff', 'left')}
+            onClick={(e) => { e.stopPropagation(); closeWindow(id) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label="Close"
+          >
+            <PxClose size={14} />
+          </button>
+
+          {/* Icon + title */}
+          <div style={{
+            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: 8, overflow: 'hidden', padding: '0 4px',
+          }}>
+            <appConfig.icon size={14} style={{ color: '#fff', flexShrink: 0 }} />
+            <span style={{
+              fontFamily: 'var(--font-family-pixel)',
+              fontSize: '16px', color: '#fff', letterSpacing: '1px',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>{title}</span>
+          </div>
+
+          {/* Minimize */}
+          <button
+            style={mobileBtnStyle(isActive ? '#000' : '#333', '#fff', 'right')}
+            onClick={(e) => { e.stopPropagation(); minimizeWindow(id) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label="Minimize"
+          >
+            <PxMinus size={14} />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div style={{
+          flex: 1, overflow: 'auto', position: 'relative',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+        }}>
+          {children}
+        </div>
+      </motion.div>
+    )
+  }
+
+  // ── DESKTOP / TABLET ─────────────────────────────────────────────
   const handleDragStart = () => { setIsInteracting(true); setShieldActive(true); focusWindow(id) }
   const handleDragStop  = () => {
     setIsInteracting(false)
@@ -41,6 +145,8 @@ export default function Window({ windowData, appConfig, children }) {
     setShieldActive(false)
     updateWindowSize(id, { width: ns.width, height: ns.height })
   }
+
+  const titleBarH = isTablet ? 44 : 36
 
   return (
     <motion.div
@@ -80,7 +186,8 @@ export default function Window({ windowData, appConfig, children }) {
       <div
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          height: '36px', flexShrink: 0, cursor: maximized ? 'default' : 'move',
+          height: titleBarH, flexShrink: 0,
+          cursor: maximized ? 'default' : 'move',
           background: isActive ? '#000' : '#333',
           borderBottom: '3px solid #000',
           userSelect: 'none',
@@ -88,12 +195,11 @@ export default function Window({ windowData, appConfig, children }) {
         onDoubleClick={() => maximizeWindow(id)}
         onPointerDown={(e) => !maximized && dragControls.start(e)}
       >
-        {/* App icon + title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '8px', overflow: 'hidden', flex: 1 }}>
           <appConfig.icon size={14} style={{ color: '#fff', flexShrink: 0 }} />
           <span style={{
             fontFamily: 'var(--font-family-pixel)',
-            fontSize: '15px', color: '#fff',
+            fontSize: isTablet ? '16px' : '15px', color: '#fff',
             letterSpacing: '1px',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
@@ -101,11 +207,9 @@ export default function Window({ windowData, appConfig, children }) {
           </span>
         </div>
 
-        {/* Window control buttons */}
         <div style={{ display: 'flex', height: '100%', flexShrink: 0 }}>
-          {/* Minimize */}
           <button
-            style={winBtnStyle('#333', '#fff')}
+            style={winBtnStyle('#333', '#fff', isTablet)}
             onClick={(e) => { e.stopPropagation(); minimizeWindow(id) }}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseEnter={(e) => { e.currentTarget.style.background = '#facc15'; e.currentTarget.style.color = '#000' }}
@@ -114,9 +218,8 @@ export default function Window({ windowData, appConfig, children }) {
           >
             <PxMinus size={12} />
           </button>
-          {/* Maximize */}
           <button
-            style={winBtnStyle('#333', '#fff')}
+            style={winBtnStyle('#333', '#fff', isTablet)}
             onClick={(e) => { e.stopPropagation(); maximizeWindow(id) }}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseEnter={(e) => { e.currentTarget.style.background = '#facc15'; e.currentTarget.style.color = '#000' }}
@@ -125,9 +228,8 @@ export default function Window({ windowData, appConfig, children }) {
           >
             <PxMaximize size={11} />
           </button>
-          {/* Close */}
           <button
-            style={winBtnStyle('#000', '#fff')}
+            style={winBtnStyle('#000', '#fff', isTablet)}
             onClick={(e) => { e.stopPropagation(); closeWindow(id) }}
             onPointerDown={(e) => e.stopPropagation()}
             onMouseEnter={(e) => { e.currentTarget.style.background = '#facc15'; e.currentTarget.style.color = '#000' }}
@@ -146,7 +248,7 @@ export default function Window({ windowData, appConfig, children }) {
         ) : (
           <ResizableBox
             width={size.width}
-            height={size.height - 40}
+            height={size.height - titleBarH - 3}
             onResizeStart={handleResizeStart}
             onResizeStop={handleResizeStop}
             resizeHandles={['se', 'e', 's']}
@@ -163,12 +265,26 @@ export default function Window({ windowData, appConfig, children }) {
   )
 }
 
-function winBtnStyle(bg, fg) {
+function mobileBtnStyle(bg, fg, side) {
   return {
-    width: '40px', height: '100%',
+    width: 48, height: '100%',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: bg, color: fg,
+    border: 'none',
+    borderRight: side === 'left'  ? '2px solid #555' : 'none',
+    borderLeft:  side === 'right' ? '2px solid #555' : 'none',
+    cursor: 'pointer', outline: 'none',
+    flexShrink: 0, touchAction: 'manipulation',
+  }
+}
+
+function winBtnStyle(bg, fg, isTablet) {
+  return {
+    width: isTablet ? '48px' : '40px', height: '100%',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     background: bg, color: fg,
     border: 'none', borderLeft: '2px solid #555',
     cursor: 'pointer', transition: 'none', outline: 'none',
+    touchAction: 'manipulation',
   }
 }
