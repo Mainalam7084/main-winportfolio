@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { PxChevronUp, PxWifi, PxShield, PxUsb, PxBluetooth, PxRadio, PxPlay, PxPause, PxSkipBack, PxSkipForward, PxCloud, PxRefresh } from '../ui/PixelIcons'
 import { useRadioStore, MOCK_STATIONS } from '../../core/radioStore'
 import { useWeatherStore, getWMO } from '../../core/weatherStore'
@@ -93,7 +93,7 @@ export default function SystemTray() {
 
           <AnimatePresence>
             {showIcons && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
@@ -107,7 +107,7 @@ export default function SystemTray() {
               >
                 <TrayBtn title="Safely Remove Hardware"><PxUsb size={16} style={{ color: '#000' }} /></TrayBtn>
                 <TrayBtn title="Security"><PxShield size={16} style={{ color: '#000' }} /></TrayBtn>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -133,7 +133,7 @@ export default function SystemTray() {
 
           <AnimatePresence>
             {showPanel && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -179,7 +179,7 @@ export default function SystemTray() {
                     {isCharging ? '⚡ ' : ''}{batteryLevel}%
                   </span>
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -196,7 +196,7 @@ export default function SystemTray() {
 
           <AnimatePresence>
             {showRadio && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -275,7 +275,7 @@ export default function SystemTray() {
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -297,7 +297,7 @@ export default function SystemTray() {
 
           <AnimatePresence>
             {showWeather && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -367,7 +367,7 @@ export default function SystemTray() {
                     </div>
                   </>
                 )}
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>
@@ -395,7 +395,7 @@ export default function SystemTray() {
 
           <AnimatePresence>
             {showClock && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -452,7 +452,7 @@ export default function SystemTray() {
                     <CalDay key={i} day={d} today={d && isToday(d)} />
                   ))}
                 </div>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>

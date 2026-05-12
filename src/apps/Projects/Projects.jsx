@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { PxGrid4, PxGlobe, PxDocument } from '../../components/ui/PixelIcons'
 
 const PROJECTS = [
@@ -71,9 +71,12 @@ export default function Projects() {
           return (
             <div
               key={proj.id}
+              role={proj.url ? 'button' : undefined}
+              tabIndex={proj.url ? 0 : undefined}
               onMouseEnter={() => setHovered(proj.id)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => proj.url && window.open(proj.url, '_blank', 'noopener,noreferrer')}
+              onKeyDown={(e) => e.key === 'Enter' && proj.url && window.open(proj.url, '_blank', 'noopener,noreferrer')}
               style={{
                 border: '2px solid #000',
                 background: isHovered ? '#facc15' : '#fff',

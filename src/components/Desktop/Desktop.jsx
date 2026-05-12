@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useStore } from '../../core/store'
 import { useFileSystem } from '../../core/fileSystemStore'
 import { useMobile, MOBILE_DOCK_H } from '../../hooks/useMobile'
@@ -68,7 +68,7 @@ function DesktopIcon({ id, name, Icon, color, selected, onSingleClick, onDoubleC
 // Mobile icon (touch-driven, tap-to-open, press animation)
 function MobileDesktopIcon({ name, Icon, color, onTap }) {
   return (
-    <motion.button
+    <m.button
       whileTap={{ scale: 0.82 }}
       onClick={(e) => { e.stopPropagation(); onTap() }}
       style={{
@@ -99,7 +99,7 @@ function MobileDesktopIcon({ name, Icon, color, onTap }) {
       }}>
         {name}
       </span>
-    </motion.button>
+    </m.button>
   )
 }
 

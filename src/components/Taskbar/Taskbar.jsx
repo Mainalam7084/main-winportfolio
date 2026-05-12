@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import SystemTray from '../SystemTray/SystemTray'
 import { useStore } from '../../core/store'
 import { AppRegistry } from '../../core/AppRegistry'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import {
   PxWindows, PxSearch, PxFolder, PxActivity, PxChevronRight, PxClose,
 } from '../ui/PixelIcons'
@@ -71,7 +71,7 @@ export default function Taskbar() {
         {/* ── Mobile Fullscreen App Launcher ── */}
         <AnimatePresence>
           {isStartMenuOpen && (
-            <motion.div
+            <m.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
@@ -181,7 +181,7 @@ export default function Taskbar() {
                     gap: 4,
                   }}>
                     {(isSearching ? searchResults : Object.values(AppRegistry)).map(app => (
-                      <motion.div
+                      <m.div
                         key={app.id}
                         whileTap={{ scale: 0.84 }}
                         onClick={() => {
@@ -212,7 +212,7 @@ export default function Taskbar() {
                         }}>
                           {app.title}
                         </span>
-                      </motion.div>
+                      </m.div>
                     ))}
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default function Taskbar() {
                   MAIN_USER
                 </span>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
@@ -316,7 +316,7 @@ export default function Taskbar() {
       {/* ── Search Results Popup ── */}
       <AnimatePresence>
         {isSearching && !isStartMenuOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
@@ -361,14 +361,14 @@ export default function Taskbar() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* ── Start Menu ── */}
       <AnimatePresence>
         {isStartMenuOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
@@ -430,7 +430,7 @@ export default function Taskbar() {
               <ProfileAvatar />
               <span style={{ fontFamily: 'var(--font-family-pixel)', fontSize: '13px', color: '#000' }}>MAIN_USER</span>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -513,9 +513,10 @@ export default function Taskbar() {
 
 // ── Mobile components ───────────────────────────────────────────────
 
-function MobileDockBtn({ children, active, onClick, title, style: extraStyle = {} }) {
+const EMPTY_STYLE = {}
+function MobileDockBtn({ children, active, onClick, title, style: extraStyle = EMPTY_STYLE }) {
   return (
-    <motion.button
+    <m.button
       onClick={onClick}
       title={title}
       whileTap={{ scale: 0.82 }}
@@ -532,7 +533,7 @@ function MobileDockBtn({ children, active, onClick, title, style: extraStyle = {
       }}
     >
       {children}
-    </motion.button>
+    </m.button>
   )
 }
 

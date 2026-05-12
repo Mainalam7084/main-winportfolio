@@ -38,14 +38,14 @@ export default function Chrome() {
 
   const goBack = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
+      setCurrentIndex(prev => prev - 1)
       setInputVal(history[currentIndex - 1])
     }
   }
 
   const goForward = () => {
     if (currentIndex < history.length - 1) {
-      setCurrentIndex(currentIndex + 1)
+      setCurrentIndex(prev => prev + 1)
       setInputVal(history[currentIndex + 1])
     }
   }

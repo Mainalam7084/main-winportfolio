@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react'
 
 const px = { fontFamily: 'var(--font-family-pixel)' }
 
+const EMPTY_MANIFEST = { photos: [], videos: [] }
+
 export default function Gallery() {
   const [tab, setTab] = useState('photos')
-  const [manifest, setManifest] = useState({ photos: [], videos: [] })
-  const [loading, setLoading] = useState(true)
-  const [lightbox, setLightbox] = useState(null) // { src, caption }
+  const [{ manifest, loading }, setGallery] = useState({ manifest: EMPTY_MANIFEST, loading: true })
+  const [lightbox, setLightbox] = useState(null)
 
   useEffect(() => {
     fetch('/media/manifest.json')
       .then((r) => r.json())
-      .then((data) => { setManifest(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then((data) => setGallery({ manifest: data, loading: false }))
+      .catch(() => setGallery(prev => ({ ...prev, loading: false })))
   }, [])
 
   const photos = manifest.photos || []

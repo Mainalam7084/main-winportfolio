@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { motion, useDragControls } from 'framer-motion'
+import { m, useDragControls } from 'framer-motion'
 import { ResizableBox } from 'react-resizable'
 import { useStore } from '../../core/store'
 import { PxClose, PxMinus, PxMaximize } from '../ui/PixelIcons'
@@ -30,7 +30,7 @@ export default function Window({ windowData, appConfig, children }) {
   // ── MOBILE FULLSCREEN SHEET ──────────────────────────────────────
   if (isMobile) {
     return (
-      <motion.div
+      <m.div
         drag="y"
         dragControls={dragControls}
         dragListener={false}
@@ -123,7 +123,7 @@ export default function Window({ windowData, appConfig, children }) {
         }}>
           {children}
         </div>
-      </motion.div>
+      </m.div>
     )
   }
 
@@ -149,7 +149,7 @@ export default function Window({ windowData, appConfig, children }) {
   const titleBarH = isTablet ? 44 : 36
 
   return (
-    <motion.div
+    <m.div
       drag={!maximized}
       dragControls={dragControls}
       dragListener={false}
@@ -261,7 +261,7 @@ export default function Window({ windowData, appConfig, children }) {
           </ResizableBox>
         )}
       </div>
-    </motion.div>
+    </m.div>
   )
 }
 

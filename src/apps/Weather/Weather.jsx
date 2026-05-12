@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { useWeatherStore, getWMO } from '../../core/weatherStore'
 import { PxRefresh, PxCloud } from '../../components/ui/PixelIcons'
 
@@ -133,7 +133,7 @@ export default function Weather() {
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         <AnimatePresence mode="wait">
           {loading && !data && (
-            <motion.div
+            <m.div
               key="loading"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -142,11 +142,11 @@ export default function Weather() {
             >
               <div style={{ width: 32, height: 32, border: '4px solid #000', borderTop: '4px solid #facc15', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               <div style={{ fontSize: '14px', color: '#555', letterSpacing: '2px' }}>FETCHING LOCATION...</div>
-            </motion.div>
+            </m.div>
           )}
 
           {error && !data && (
-            <motion.div
+            <m.div
               key="error"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -163,11 +163,11 @@ export default function Weather() {
               >
                 RETRY
               </button>
-            </motion.div>
+            </m.div>
           )}
 
           {data && (
-            <motion.div
+            <m.div
               key="data"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -183,12 +183,12 @@ export default function Weather() {
               {/* Main weather display */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 24px', gap: '16px' }}>
                 {/* Weather icon */}
-                <motion.div
+                <m.div
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <WeatherIcon type={wmo.type} size={80} />
-                </motion.div>
+                </m.div>
 
                 {/* Temperature */}
                 <div style={{ textAlign: 'center' }}>
@@ -211,7 +211,7 @@ export default function Weather() {
                   BRUTA/OS WEATHER — OPEN-METEO API
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>

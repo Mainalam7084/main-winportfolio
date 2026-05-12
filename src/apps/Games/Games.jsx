@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useStore } from '../../core/store'
 import { PxGamepad } from '../../components/ui/PixelIcons'
 
@@ -65,7 +65,7 @@ export default function Games() {
       {/* Game grid */}
       <div style={{ flex: 1, padding: '24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', alignContent: 'start', background: '#f5f5f5', overflowY: 'auto' }}>
         {GAMES.map(game => (
-          <motion.button
+          <m.button
             key={game.id}
             onClick={() => openWindow({ app: game.id, title: game.title })}
             initial={{ opacity: 0, y: 8 }}
@@ -112,7 +112,7 @@ export default function Games() {
                 </div>
               </div>
             </div>
-          </motion.button>
+          </m.button>
         ))}
 
         {/* Coming soon card */}

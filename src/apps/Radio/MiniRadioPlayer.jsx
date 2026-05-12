@@ -1,5 +1,5 @@
 import React from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { useRadioStore } from '../../core/radioStore'
 import { useStore } from '../../core/store'
 import { PxPlay, PxPause, PxSkipBack, PxSkipForward, PxClose, PxRadio } from '../../components/ui/PixelIcons'
@@ -16,7 +16,7 @@ export default function MiniRadioPlayer() {
   return (
     <AnimatePresence>
       {shouldShow && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, x: 40, scale: 0.9 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 40, scale: 0.9 }}
@@ -77,7 +77,7 @@ export default function MiniRadioPlayer() {
             </MiniBtn>
             <MiniBtn onClick={playNext}><PxSkipForward size={14} /></MiniBtn>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )
