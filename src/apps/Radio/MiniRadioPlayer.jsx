@@ -1,11 +1,12 @@
 import React from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, m } from 'framer-motion'
 import { useRadioStore } from '../../core/radioStore'
 import { useStore } from '../../core/store'
 import { PxPlay, PxPause, PxSkipBack, PxSkipForward, PxClose, PxRadio } from '../../components/ui/PixelIcons'
 
 const WRAPPER_STYLE = {
-  position: 'fixed', top: 16, right: 16, zIndex: 40,
+  position: 'fixed', top: 16, right: 16, zIndex: 9000,
   width: 240,
   background: '#fff', border: '3px solid #000',
   boxShadow: '6px 6px 0 #000',
@@ -53,15 +54,16 @@ const MINI_BTN_BASE = {
 }
 
 export default function MiniRadioPlayer() {
-  const { isPlaying, currentStation, togglePlay, playNext, playPrev, stopAudio } = useRadioStore()
+  const { isPlaying, isBuffering, currentStation, togglePlay, playNext, playPrev, stopAudio } = useRadioStore()
   const windows       = useStore(state => state.windows)
   const restoreWindow = useStore(state => state.restoreWindow)
   const closeWindow   = useStore(state => state.closeWindow)
+  const openWindow    = useStore(state => state.openWindow)
 
   const radioWindow = windows.find(w => w.app === 'radio')
-  const shouldShow  = isPlaying && !!radioWindow
+  const shouldShow  = (isPlaying || isBuffering) && (!radioWindow || radioWindow.minimized)
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {shouldShow && (
         <m.div
@@ -81,10 +83,14 @@ export default function MiniRadioPlayer() {
           {/* Header */}
           <div style={HEADER_STYLE}>
             <PxRadio size={14} style={{ color: '#fff', flexShrink: 0 }} />
-            <span style={STATION_NAME_STYLE}>{currentStation.name}</span>
+            <span style={STATION_NAME_STYLE}>{currentStation?.name || 'Radio'}</span>
             <button
               className="mini-radio-close"
-              onClick={(e) => { e.stopPropagation(); stopAudio(); closeWindow(radioWindow.id) }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                stopAudio(); 
+                if (radioWindow) closeWindow(radioWindow.id) 
+              }}
               style={CLOSE_BTN_STYLE}
               onMouseEnter={(e) => { Object.assign(e.currentTarget.style, { background: '#facc15', border: '2px solid #000' }) }}
               onMouseLeave={(e) => { Object.assign(e.currentTarget.style, { background: '#333', border: '2px solid #555' }) }}
@@ -97,7 +103,13 @@ export default function MiniRadioPlayer() {
           {/* Status + click to restore */}
           <button
             className="mini-radio-status"
-            onClick={() => restoreWindow(radioWindow.id)}
+            onClick={() => {
+              if (radioWindow) {
+                restoreWindow(radioWindow.id)
+              } else {
+                openWindow({ app: 'radio', title: 'Radio' })
+              }
+            }}
             style={STATUS_BTN_STYLE}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(250,204,21,0.15)' }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
@@ -125,7 +137,8 @@ export default function MiniRadioPlayer() {
           </div>
         </m.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
 

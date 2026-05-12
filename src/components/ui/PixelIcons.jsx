@@ -240,18 +240,6 @@ export const PxPause = ({ size = 24, className = '', style: xStyle, ...rest }) =
 
 export const PxSkipBack = ({ size = 24, className = '', style: xStyle, ...rest }) => (
   <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
-    <rect x="2" y="2" width="2" height="12"/>
-    <rect x="4" y="3" width="2" height="10"/>
-    <rect x="6" y="4" width="2" height="8"/>
-    <rect x="8" y="5" width="2" height="6"/>
-    <rect x="10" y="6" width="2" height="4"/>
-    <rect x="12" y="7" width="1" height="2"/>
-    <rect x="12" y="2" width="2" height="12"/>
-  </svg>
-)
-
-export const PxSkipForward = ({ size = 24, className = '', style: xStyle, ...rest }) => (
-  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
     <rect x="12" y="2" width="2" height="12"/>
     <rect x="10" y="3" width="2" height="10"/>
     <rect x="8" y="4" width="2" height="8"/>
@@ -259,6 +247,18 @@ export const PxSkipForward = ({ size = 24, className = '', style: xStyle, ...res
     <rect x="4" y="6" width="2" height="4"/>
     <rect x="3" y="7" width="1" height="2"/>
     <rect x="2" y="2" width="2" height="12"/>
+  </svg>
+)
+
+export const PxSkipForward = ({ size = 24, className = '', style: xStyle, ...rest }) => (
+  <svg viewBox="0 0 16 16" width={size} height={size} className={className} style={{ ...S, ...xStyle }} fill="currentColor" {...rest}>
+    <rect x="2" y="2" width="2" height="12"/>
+    <rect x="4" y="3" width="2" height="10"/>
+    <rect x="6" y="4" width="2" height="8"/>
+    <rect x="8" y="5" width="2" height="6"/>
+    <rect x="10" y="6" width="2" height="4"/>
+    <rect x="12" y="7" width="1" height="2"/>
+    <rect x="12" y="2" width="2" height="12"/>
   </svg>
 )
 

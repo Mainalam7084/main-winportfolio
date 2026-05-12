@@ -35,16 +35,13 @@ export const useRadioStore = create((set, get) => ({
     const { audioElement, isPlaying, currentStation } = get()
     set({ error: null })
 
-    if (!audioElement.src) {
-      audioElement.src = currentStation.url
-    }
-
-    audioElement.load()
-
     if (isPlaying) {
       audioElement.pause()
       set({ isPlaying: false })
     } else {
+      if (!audioElement.src) {
+        audioElement.src = currentStation.url
+      }
       set({ isBuffering: true })
       audioElement.play().then(() => {
         set({ isPlaying: true, isBuffering: false })
@@ -84,17 +81,16 @@ export const useRadioStore = create((set, get) => ({
     const wasPlaying = get().isPlaying
 
     audio.pause()
-    set({ currentStation: stationObj, error: null })
     audio.src = stationObj.url
-    audio.load()
+    set({ currentStation: stationObj, isPlaying: false, error: null })
 
     if (wasPlaying) {
       set({ isBuffering: true })
-      audio.play().catch(err => {
+      audio.play().then(() => {
+        set({ isPlaying: true, isBuffering: false })
+      }).catch(err => {
         console.error("Audio playback failed:", err)
-        set({ error: "Autoplay blocked. Please press play manually.", isPlaying: false })
-      }).finally(() => {
-        set({ isBuffering: false })
+        set({ error: "Autoplay blocked. Press play manually.", isPlaying: false, isBuffering: false })
       })
     }
   }
