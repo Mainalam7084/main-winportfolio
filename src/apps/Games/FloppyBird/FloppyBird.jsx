@@ -39,6 +39,7 @@ export default function FloppyBird() {
   const rafRef = useRef(null)
   const [score, setScore] = useState(0)
   const [phase, setPhase] = useState('start')
+  const phaseRef = useRef('start')
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current
@@ -208,16 +209,18 @@ export default function FloppyBird() {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
   }, [draw])
 
+  useEffect(() => { phaseRef.current = phase }, [phase])
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.code !== 'Space') return
       e.preventDefault()
-      if (phase === 'playing') flap()
+      if (phaseRef.current === 'playing') flap()
       else start()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, flap, start])
+  }, [flap, start])
 
   const handleCanvasClick = useCallback(() => {
     if (phase === 'playing') flap()

@@ -25,7 +25,7 @@ export default function About() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative',
         }}>
-          <img src="public/main.png" alt="Main" className="w-full h-full object-cover" />
+          <img src="/main.png" alt="Main" className="w-full h-full object-cover" />
         </div>
 
         {/* Name + role */}

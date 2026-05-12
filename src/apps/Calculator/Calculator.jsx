@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useReducer, useEffect, useCallback } from 'react'
 import { PxCalculator } from '../../components/ui/PixelIcons'
 
 const ROWS = [
@@ -28,69 +28,49 @@ function calc(a, b, op) {
 const px = { fontFamily: 'var(--font-family-pixel)' }
 const OPS = ['+', '-', '×', '÷', '=']
 
+const INIT = { display: '0', prevVal: null, op: null, waitOp: false, expr: '' }
+
+function reducer(state, key) {
+  const { display, prevVal, op, waitOp } = state
+
+  if ('0123456789'.includes(key)) {
+    if (waitOp) return { ...state, waitOp: false, display: key }
+    return { ...state, display: display === '0' ? key : display.length < 12 ? display + key : display }
+  }
+  if (key === '.') {
+    if (waitOp) return { ...state, waitOp: false, display: '0.' }
+    return { ...state, display: display.includes('.') ? display : display + '.' }
+  }
+  if (key === '⌫') {
+    if (waitOp) return state
+    return { ...state, display: display.length > 1 ? display.slice(0, -1) : '0' }
+  }
+  if (key === 'C') return INIT
+  if (key === '±') return { ...state, display: fmt(-parseFloat(display)) }
+  if (key === '%') return { ...state, display: fmt(parseFloat(display) / 100) }
+
+  if (OPS.includes(key) && key !== '=') {
+    const cur = parseFloat(display)
+    if (prevVal !== null && !waitOp) {
+      const rs = fmt(calc(prevVal, cur, op))
+      return { display: rs, prevVal: parseFloat(rs), op: key, waitOp: true, expr: rs + ' ' + key }
+    }
+    return { ...state, prevVal: cur, op: key, waitOp: true, expr: display + ' ' + key }
+  }
+  if (key === '=') {
+    if (op && prevVal !== null) {
+      const rs = fmt(calc(prevVal, parseFloat(display), op))
+      return { display: rs, prevVal: null, op: null, waitOp: true, expr: '' }
+    }
+    return state
+  }
+  return state
+}
+
 export default function Calculator() {
-  const [display, setDisplay] = useState('0')
-  const [prevVal, setPrevVal] = useState(null)
-  const [op, setOp] = useState(null)
-  const [waitOp, setWaitOp] = useState(false)
-  const [expr, setExpr] = useState('')
+  const [{ display, op, expr }, dispatch] = useReducer(reducer, INIT)
 
-  const input = useCallback((key) => {
-    setDisplay(prev => {
-      if ('0123456789'.includes(key)) {
-        if (waitOp) { setWaitOp(false); return key }
-        return prev === '0' ? key : prev.length < 12 ? prev + key : prev
-      }
-
-      if (key === '.') {
-        if (waitOp) { setWaitOp(false); return '0.' }
-        return prev.includes('.') ? prev : prev + '.'
-      }
-
-      if (key === '⌫') {
-        if (waitOp) return prev
-        return prev.length > 1 ? prev.slice(0, -1) : '0'
-      }
-
-      if (key === 'C') {
-        setPrevVal(null); setOp(null); setWaitOp(false); setExpr('')
-        return '0'
-      }
-
-      if (key === '±') return fmt(-parseFloat(prev))
-      if (key === '%') return fmt(parseFloat(prev) / 100)
-
-      if (OPS.includes(key) && key !== '=') {
-        const cur = parseFloat(prev)
-        if (prevVal !== null && !waitOp) {
-          const result = calc(prevVal, cur, op)
-          const rs = fmt(result)
-          setPrevVal(result)
-          setOp(key)
-          setWaitOp(true)
-          setExpr(rs + ' ' + key)
-          return rs
-        }
-        setPrevVal(cur)
-        setOp(key)
-        setWaitOp(true)
-        setExpr(prev + ' ' + key)
-        return prev
-      }
-
-      if (key === '=') {
-        if (op && prevVal !== null) {
-          const result = calc(prevVal, parseFloat(prev), op)
-          const rs = fmt(result)
-          setPrevVal(null); setOp(null); setWaitOp(true); setExpr('')
-          return rs
-        }
-        return prev
-      }
-
-      return prev
-    })
-  }, [waitOp, prevVal, op])
+  const input = useCallback((key) => dispatch(key), [])
 
   useEffect(() => {
     const map = {

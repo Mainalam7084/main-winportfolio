@@ -37,12 +37,22 @@ export default function SystemTray() {
 
   useEffect(() => {
     if (!('getBattery' in navigator)) return
+    let bat = null
+    const onLevel    = () => setBattery(Math.floor(bat.level * 100))
+    const onCharging = () => setIsCharging(bat.charging)
     navigator.getBattery().then(b => {
+      bat = b
       setBattery(Math.floor(b.level * 100))
       setIsCharging(b.charging)
-      b.addEventListener('levelchange', () => setBattery(Math.floor(b.level * 100)))
-      b.addEventListener('chargingchange', () => setIsCharging(b.charging))
+      b.addEventListener('levelchange', onLevel)
+      b.addEventListener('chargingchange', onCharging)
     })
+    return () => {
+      if (bat) {
+        bat.removeEventListener('levelchange', onLevel)
+        bat.removeEventListener('chargingchange', onCharging)
+      }
+    }
   }, [])
 
   const HH = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
