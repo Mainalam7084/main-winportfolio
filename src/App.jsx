@@ -17,8 +17,6 @@ function App() {
       <div className="flex-1 relative z-0 overflow-hidden">
         <Desktop />
         <WindowManager />
-        {/* Global Widgets */}
-        <MiniRadioPlayer />
       </div>
 
       {/*
@@ -31,6 +29,9 @@ function App() {
       <div className="h-16 md:h-12 relative z-50 flex-shrink-0">
         <Taskbar />
       </div>
+
+      {/* Global Widgets — outside overflow:hidden so position:fixed renders correctly */}
+      <MiniRadioPlayer />
     </div>
     </LazyMotion>
   )
